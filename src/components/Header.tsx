@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { BookOpen, Play, Trophy, Settings, Menu } from 'lucide-react';
+import { BookOpen, Play, Menu } from 'lucide-react';
 import { useCourse } from '../context/CourseContext';
 
 interface HeaderProps {
@@ -36,7 +36,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
             <div className="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-lg flex items-center justify-center">
               <BookOpen className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
             </div>
-            <h1 className="hidden sm:block text-base sm:text-lg lg:text-xl font-bold text-dark-900 truncate">
+            <h1 className="text-base sm:text-lg lg:text-xl font-bold text-dark-900 truncate">
               SVG Animations
             </h1>
           </Link>
@@ -91,22 +91,6 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
               <Play className="w-4 h-4" />
               <span className="text-xs sm:text-sm font-medium hidden sm:inline">Playground</span>
             </Link>
-
-            <button
-              className="flex items-center space-x-1 lg:space-x-2 text-dark-600 hover:text-secondary-600 transition-colors p-1.5 sm:p-2 rounded-lg hover:bg-dark-100 touch-manipulation"
-              aria-label="Achievements"
-            >
-              <Trophy className="w-4 h-4" />
-              <span className="text-xs sm:text-sm font-medium hidden lg:inline">Achievements</span>
-            </button>
-
-            <button
-              className="flex items-center space-x-1 lg:space-x-2 text-dark-600 hover:text-dark-800 transition-colors p-1.5 sm:p-2 rounded-lg hover:bg-dark-100 touch-manipulation"
-              aria-label="Settings"
-            >
-              <Settings className="w-4 h-4" />
-              <span className="text-xs sm:text-sm font-medium hidden lg:inline">Settings</span>
-            </button>
           </nav>
         </div>
       </div>

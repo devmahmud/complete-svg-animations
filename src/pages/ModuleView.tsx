@@ -27,38 +27,50 @@ const ModuleView: React.FC = () => {
   const [showPlayground, setShowPlayground] = useState(true);
   const [markingComplete, setMarkingComplete] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const module = getCurrentModule();
   const currentLesson = getCurrentLesson();
 
   useEffect(() => {
-    if (module && moduleId) {
-      dispatch({ type: 'SET_CURRENT_MODULE', payload: moduleId });
+    const initializeModule = async () => {
+      setIsLoading(true);
+      try {
+        if (module && moduleId) {
+          dispatch({ type: 'SET_CURRENT_MODULE', payload: moduleId });
 
-      if (lessonId) {
-        const lessonIndex = module.lessons.findIndex((l) => l.id === lessonId);
-        if (lessonIndex !== -1) {
-          setCurrentLessonIndex(lessonIndex);
-          dispatch({ type: 'SET_CURRENT_LESSON', payload: lessonId });
-        } else {
-          // If lesson not found, go to first lesson
-          const firstLesson = module.lessons[0];
-          if (firstLesson) {
-            setCurrentLessonIndex(0);
-            dispatch({ type: 'SET_CURRENT_LESSON', payload: firstLesson.id });
-            navigate(`/module/${moduleId}?lesson=${firstLesson.id}`);
+          if (lessonId) {
+            const lessonIndex = module.lessons.findIndex((l) => l.id === lessonId);
+            if (lessonIndex !== -1) {
+              setCurrentLessonIndex(lessonIndex);
+              dispatch({ type: 'SET_CURRENT_LESSON', payload: lessonId });
+            } else {
+              // If lesson not found, go to first lesson
+              const firstLesson = module.lessons[0];
+              if (firstLesson) {
+                setCurrentLessonIndex(0);
+                dispatch({ type: 'SET_CURRENT_LESSON', payload: firstLesson.id });
+                navigate(`/module/${moduleId}?lesson=${firstLesson.id}`);
+              }
+            }
+          } else {
+            // If no lesson specified, go to first lesson
+            const firstLesson = module.lessons[0];
+            if (firstLesson) {
+              setCurrentLessonIndex(0);
+              dispatch({ type: 'SET_CURRENT_LESSON', payload: firstLesson.id });
+              navigate(`/module/${moduleId}?lesson=${firstLesson.id}`);
+            }
           }
         }
-      } else {
-        // If no lesson specified, go to first lesson
-        const firstLesson = module.lessons[0];
-        if (firstLesson) {
-          setCurrentLessonIndex(0);
-          dispatch({ type: 'SET_CURRENT_LESSON', payload: firstLesson.id });
-          navigate(`/module/${moduleId}?lesson=${firstLesson.id}`);
-        }
+      } catch (error) {
+        console.error('Error initializing module:', error);
+      } finally {
+        setIsLoading(false);
       }
-    }
+    };
+
+    initializeModule();
   }, [module, moduleId, lessonId, dispatch, navigate]);
 
   const handleLessonComplete = async () => {
@@ -108,12 +120,26 @@ const ModuleView: React.FC = () => {
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader className="w-8 h-8 animate-spin text-primary-600" />
+      </div>
+    );
+  }
+
   if (!module) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <h2 className="text-2xl font-semibold text-dark-900 mb-2">Module Not Found</h2>
           <p className="text-dark-600">The requested module could not be found.</p>
+          <Link
+            to="/"
+            className="mt-4 inline-block px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+          >
+            Return to Home
+          </Link>
         </div>
       </div>
     );
