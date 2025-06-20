@@ -1,0 +1,86 @@
+# Timing Functions
+
+## Understanding Easing
+
+Timing functions control how animations accelerate and decelerate:
+
+```css
+.element {
+  /* Linear - constant speed */
+  transition: transform 1s linear;
+  
+  /* Ease - slow start, fast middle, slow end */
+  transition: transform 1s ease;
+  
+  /* Ease-in - slow start, fast end */
+  transition: transform 1s ease-in;
+  
+  /* Ease-out - fast start, slow end */
+  transition: transform 1s ease-out;
+  
+  /* Ease-in-out - slow start and end, fast middle */
+  transition: transform 1s ease-in-out;
+  
+  /* Cubic bezier - custom curve */
+  transition: transform 1s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+```
+
+## Custom Cubic Bezier
+
+```css
+/* Bounce effect */
+transition: transform 1s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+/* Elastic effect */
+transition: transform 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+/* Smooth acceleration */
+transition: transform 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+```
+
+## Timing Function Examples
+
+```html
+<div class="demo-container">
+  <div class="demo-item linear">Linear</div>
+  <div class="demo-item ease">Ease</div>
+  <div class="demo-item ease-in">Ease-in</div>
+  <div class="demo-item ease-out">Ease-out</div>
+  <div class="demo-item ease-in-out">Ease-in-out</div>
+  <div class="demo-item bounce">Bounce</div>
+</div>
+```
+
+```css
+.demo-container {
+  display: flex;
+  gap: 20px;
+  padding: 20px;
+}
+
+.demo-item {
+  width: 60px;
+  height: 60px;
+  background: #3b82f6;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 12px;
+  cursor: pointer;
+  transition: transform 1s;
+}
+
+.demo-item:hover {
+  transform: translateX(100px);
+}
+
+.linear { transition-timing-function: linear; }
+.ease { transition-timing-function: ease; }
+.ease-in { transition-timing-function: ease-in; }
+.ease-out { transition-timing-function: ease-out; }
+.ease-in-out { transition-timing-function: ease-in-out; }
+.bounce { transition-timing-function: cubic-bezier(0.68, -0.55, 0.265, 1.55); }
+``` 

@@ -1,0 +1,95 @@
+# Advanced Path Techniques
+
+## Path Clipping
+
+```html
+<svg viewBox="0 0 100 100">
+  <defs>
+    <clipPath id="circleClip">
+      <circle cx="50" cy="50" r="40"/>
+    </clipPath>
+  </defs>
+  
+  <rect 
+    x="0" 
+    y="0" 
+    width="100" 
+    height="100" 
+    fill="url(#gradient)"
+    clip-path="url(#circleClip)"
+  >
+    <animate 
+      attributeName="x"
+      values="0;-100"
+      dur="3s"
+      repeatCount="indefinite"
+    />
+  </rect>
+</svg>
+```
+
+## Path Masks
+
+```html
+<svg viewBox="0 0 100 100">
+  <defs>
+    <mask id="pathMask">
+      <rect width="100" height="100" fill="white"/>
+      <path 
+        d="M 20 50 L 80 50"
+        stroke="black"
+        stroke-width="20"
+        fill="none"
+      >
+        <animate 
+          attributeName="stroke-dasharray"
+          values="0,100;100,0"
+          dur="2s"
+          repeatCount="indefinite"
+        />
+      </path>
+    </mask>
+  </defs>
+  
+  <rect 
+    x="0" 
+    y="0" 
+    width="100" 
+    height="100" 
+    fill="blue"
+    mask="url(#pathMask)"
+  />
+</svg>
+```
+
+## Path Gradients
+
+```html
+<svg viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="pathGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="red"/>
+      <stop offset="50%" stop-color="yellow"/>
+      <stop offset="100%" stop-color="blue"/>
+    </linearGradient>
+  </defs>
+  
+  <path 
+    d="M 10 20 Q 50 10 90 20 Q 50 30 10 20"
+    fill="url(#pathGradient)"
+    stroke="black"
+    stroke-width="2"
+  >
+    <animate 
+      attributeName="d"
+      values="
+        M 10 20 Q 50 10 90 20 Q 50 30 10 20;
+        M 10 80 Q 50 90 90 80 Q 50 70 10 80;
+        M 10 20 Q 50 10 90 20 Q 50 30 10 20
+      "
+      dur="3s"
+      repeatCount="indefinite"
+    />
+  </path>
+</svg>
+``` 

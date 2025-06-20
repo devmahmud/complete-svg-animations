@@ -1,0 +1,32 @@
+# The Path Element
+
+## Understanding Paths
+
+The `<path>` element is the most powerful and versatile SVG element. It can create any shape by defining a series of drawing commands.
+
+## Basic Path Structure
+
+```html
+<svg viewBox="0 0 100 100">
+  <path 
+    d="M 10 10 L 90 10 L 90 90 L 10 90 Z"
+    fill="blue"
+    stroke="black"
+    stroke-width="2"
+  />
+</svg>
+```
+
+## Path Attributes
+
+```html
+<path 
+  d="..."                    <!-- Path data (commands and coordinates) -->
+  fill="blue"               <!-- Fill color -->
+  stroke="black"            <!-- Stroke color -->
+  stroke-width="2"          <!-- Stroke thickness -->
+  stroke-linecap="round"    <!-- Line endings -->
+  stroke-linejoin="round"   <!-- Corner joins -->
+  stroke-dasharray="5,5"    <!-- Dashed pattern -->
+/>
+``` 

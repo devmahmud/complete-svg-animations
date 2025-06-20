@@ -1,0 +1,67 @@
+# Practice Exercises
+
+## Exercise 1: Basic Shapes
+Create an SVG with all seven primitive shapes:
+
+```html
+<svg viewBox="0 0 200 200">
+  <!-- Rectangle -->
+  <rect x="10" y="10" width="40" height="30" fill="red"/>
+  
+  <!-- Circle -->
+  <circle cx="80" cy="25" r="15" fill="blue"/>
+  
+  <!-- Ellipse -->
+  <ellipse cx="120" cy="25" rx="20" ry="10" fill="green"/>
+  
+  <!-- Line -->
+  <line x1="10" y1="60" x2="50" y2="60" stroke="purple" stroke-width="3"/>
+  
+  <!-- Polyline -->
+  <polyline points="60,50 80,70 100,50 120,70" fill="none" stroke="orange" stroke-width="2"/>
+  
+  <!-- Polygon -->
+  <polygon points="140,50 160,70 180,50" fill="yellow"/>
+  
+  <!-- Path -->
+  <path d="M 10 100 L 50 100 L 50 130 L 10 130 Z" fill="cyan"/>
+</svg>
+```
+
+## Exercise 2: Icon Building
+Create a simple icon using multiple shapes:
+
+```html
+<!-- Heart icon -->
+<svg viewBox="0 0 24 24">
+  <path 
+    d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+    fill="red"
+  />
+</svg>
+```
+
+## Exercise 3: Responsive Design
+Create an SVG that works at multiple sizes:
+
+```html
+<!-- Responsive icon -->
+<svg viewBox="0 0 24 24" width="16" height="16">
+  <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/>
+  <path d="M12 6v6l4 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+```
+
+## Key Takeaways
+
+1. **SVGs use the path model** - everything is constructed from paths
+2. **Only seven primitive shapes** form the foundation
+3. **ViewBox makes SVGs responsive** and scalable
+4. **Coordinate system** starts at top-left (0,0)
+5. **Grouping** helps organize complex SVGs
+6. **Styling attributes** control appearance
+7. **Practice is essential** for mastering SVG creation
+
+## Next Steps
+
+You're now ready to move on to **Module 2: Your First Animation** where you'll learn how to bring these static shapes to life with CSS animations and transitions. 

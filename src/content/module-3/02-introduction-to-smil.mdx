@@ -1,0 +1,27 @@
+# Introduction to SMIL
+
+## What is SMIL?
+
+SMIL is an XML-based language for describing multimedia presentations. In SVG, it provides powerful animation capabilities through dedicated animation elements.
+
+## Basic SMIL Structure
+
+```html
+<svg viewBox="0 0 100 100">
+  <circle cx="50" cy="50" r="20" fill="blue">
+    <animate 
+      attributeName="r"
+      values="20;40;20"
+      dur="2s"
+      repeatCount="indefinite"
+    />
+  </circle>
+</svg>
+```
+
+## SMIL Animation Elements
+
+1. **`<animate>`** - Animate any attribute
+2. **`<animateTransform>`** - Animate transforms
+3. **`<animateMotion>`** - Follow paths
+4. **`<set>`** - Set discrete values 

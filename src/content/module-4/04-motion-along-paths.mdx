@@ -1,0 +1,124 @@
+# Motion Along Paths
+
+## The `<animateMotion>` Element
+
+SMIL's `<animateMotion>` element allows objects to follow path trajectories:
+
+```html
+<svg viewBox="0 0 200 200">
+  <!-- The path to follow -->
+  <path 
+    d="M 20 100 Q 100 20 180 100"
+    fill="none"
+    stroke="gray"
+    stroke-width="2"
+    stroke-dasharray="5,5"
+  />
+  
+  <!-- The moving object -->
+  <circle r="8" fill="red">
+    <animateMotion 
+      dur="3s"
+      repeatCount="indefinite"
+      path="M 20 100 Q 100 20 180 100"
+    />
+  </circle>
+</svg>
+```
+
+## Complex Motion Paths
+
+```html
+<svg viewBox="0 0 200 200">
+  <!-- Complex path -->
+  <path 
+    d="M 20 100 
+       C 50 20 150 20 180 100
+       S 150 180 100 150
+       Q 50 120 20 100"
+    fill="none"
+    stroke="gray"
+    stroke-width="2"
+    stroke-dasharray="5,5"
+  />
+  
+  <!-- Moving object with rotation -->
+  <g>
+    <circle r="6" fill="blue"/>
+    <line x1="0" y1="0" x2="0" y2="-12" stroke="blue" stroke-width="2"/>
+    <animateMotion 
+      dur="4s"
+      repeatCount="indefinite"
+      path="M 20 100 C 50 20 150 20 180 100 S 150 180 100 150 Q 50 120 20 100"
+      rotate="auto"
+    />
+  </g>
+</svg>
+```
+
+## Multiple Objects on Paths
+
+```html
+<svg viewBox="0 0 200 200">
+  <path 
+    d="M 20 100 Q 100 20 180 100"
+    fill="none"
+    stroke="gray"
+    stroke-width="2"
+    stroke-dasharray="5,5"
+  />
+  
+  <!-- First object -->
+  <circle r="6" fill="red">
+    <animateMotion 
+      dur="2s"
+      repeatCount="indefinite"
+      path="M 20 100 Q 100 20 180 100"
+    />
+  </circle>
+  
+  <!-- Second object (delayed) -->
+  <circle r="6" fill="blue">
+    <animateMotion 
+      dur="2s"
+      begin="1s"
+      repeatCount="indefinite"
+      path="M 20 100 Q 100 20 180 100"
+    />
+  </circle>
+  
+  <!-- Third object (delayed) -->
+  <circle r="6" fill="green">
+    <animateMotion 
+      dur="2s"
+      begin="2s"
+      repeatCount="indefinite"
+      path="M 20 100 Q 100 20 180 100"
+    />
+  </circle>
+</svg>
+```
+
+## Path Following with CSS
+
+```html
+<svg viewBox="0 0 200 200">
+  <path 
+    id="motionPath"
+    d="M 20 100 Q 100 20 180 100"
+    fill="none"
+    stroke="gray"
+    stroke-width="2"
+    stroke-dasharray="5,5"
+  />
+  
+  <circle r="8" fill="red" style="offset-path: path('M 20 100 Q 100 20 180 100');">
+    <animate 
+      attributeName="offset-distance"
+      values="0;1"
+      dur="3s"
+      repeatCount="indefinite"
+    />
+  </circle>
+</svg>
+``` 

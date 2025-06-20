@@ -1,0 +1,46 @@
+# Styling Attributes
+
+## Fill and Stroke
+
+```html
+<rect 
+  fill="red"           <!-- Fill color -->
+  stroke="blue"        <!-- Border color -->
+  stroke-width="2"     <!-- Border thickness -->
+  fill-opacity="0.5"   <!-- Fill transparency -->
+  stroke-opacity="0.8" <!-- Border transparency -->
+/>
+```
+
+## Color Values
+
+SVGs accept various color formats:
+
+```html
+<!-- Named colors -->
+fill="red"
+
+<!-- Hex colors -->
+fill="#ff0000"
+
+<!-- RGB -->
+fill="rgb(255, 0, 0)"
+
+<!-- RGBA with transparency -->
+fill="rgba(255, 0, 0, 0.5)"
+
+<!-- Current color (inherits from parent) -->
+fill="currentColor"
+```
+
+## Stroke Properties
+
+```html
+<path 
+  stroke="black"
+  stroke-width="3"
+  stroke-linecap="round"    <!-- Line endings: butt, round, square -->
+  stroke-linejoin="round"   <!-- Corner joins: miter, round, bevel -->
+  stroke-dasharray="5,5"    <!-- Dashed line pattern -->
+/>
+``` 

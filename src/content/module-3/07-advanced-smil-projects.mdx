@@ -1,0 +1,249 @@
+# Advanced SMIL Projects
+
+## Project 1: Morphing Shapes
+
+Create shapes that morph between different forms:
+
+```html
+<svg viewBox="0 0 100 100" width="300" height="300">
+  <path fill="blue" stroke="black" stroke-width="2">
+    <!-- Start as a circle -->
+    <animate 
+      attributeName="d"
+      values="
+        M 50 20 A 30 30 0 1 1 50 80 A 30 30 0 1 1 50 20;
+        M 20 50 L 80 50 L 50 20 Z;
+        M 20 20 L 80 20 L 80 80 L 20 80 Z;
+        M 50 20 A 30 30 0 1 1 50 80 A 30 30 0 1 1 50 20
+      "
+      dur="4s"
+      repeatCount="indefinite"
+    />
+  </path>
+</svg>
+```
+
+## Project 2: Animated Data Visualization
+
+Create an animated chart:
+
+```html
+<svg viewBox="0 0 200 100" width="400" height="200">
+  <!-- Background -->
+  <rect x="0" y="0" width="200" height="100" fill="#f8f9fa"/>
+  
+  <!-- Grid lines -->
+  <line x1="0" y1="25" x2="200" y2="25" stroke="#dee2e6" stroke-width="1"/>
+  <line x1="0" y1="50" x2="200" y2="50" stroke="#dee2e6" stroke-width="1"/>
+  <line x1="0" y1="75" x2="200" y2="75" stroke="#dee2e6" stroke-width="1"/>
+  
+  <!-- Animated bars -->
+  <rect x="20" y="80" width="20" height="0" fill="#007bff">
+    <animate 
+      attributeName="height"
+      values="0;60"
+      dur="2s"
+      begin="0s"
+    />
+    <animate 
+      attributeName="y"
+      values="80;20"
+      dur="2s"
+      begin="0s"
+    />
+  </rect>
+  
+  <rect x="60" y="80" width="20" height="0" fill="#28a745">
+    <animate 
+      attributeName="height"
+      values="0;40"
+      dur="2s"
+      begin="0.5s"
+    />
+    <animate 
+      attributeName="y"
+      values="80;40"
+      dur="2s"
+      begin="0.5s"
+    />
+  </rect>
+  
+  <rect x="100" y="80" width="20" height="0" fill="#ffc107">
+    <animate 
+      attributeName="height"
+      values="0;80"
+      dur="2s"
+      begin="1s"
+    />
+    <animate 
+      attributeName="y"
+      values="80;0"
+      dur="2s"
+      begin="1s"
+    />
+  </rect>
+  
+  <rect x="140" y="80" width="20" height="0" fill="#dc3545">
+    <animate 
+      attributeName="height"
+      values="0;30"
+      dur="2s"
+      begin="1.5s"
+    />
+    <animate 
+      attributeName="y"
+      values="80;50"
+      dur="2s"
+      begin="1.5s"
+    />
+  </rect>
+</svg>
+```
+
+## Project 3: Interactive Loading Spinner
+
+```html
+<svg viewBox="0 0 100 100" width="200" height="200">
+  <defs>
+    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#007bff">
+        <animate 
+          attributeName="stop-color"
+          values="#007bff;#28a745;#ffc107;#dc3545;#007bff"
+          dur="3s"
+          repeatCount="indefinite"
+        />
+      </stop>
+      <stop offset="100%" stop-color="#6f42c1">
+        <animate 
+          attributeName="stop-color"
+          values="#6f42c1;#fd7e14;#e83e8c;#20c997;#6f42c1"
+          dur="3s"
+          repeatCount="indefinite"
+        />
+      </stop>
+    </linearGradient>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="50" cy="50" r="40" fill="none" stroke="#e9ecef" stroke-width="8"/>
+  
+  <!-- Animated progress circle -->
+  <circle 
+    cx="50" 
+    cy="50" 
+    r="40" 
+    fill="none" 
+    stroke="url(#gradient)" 
+    stroke-width="8"
+    stroke-linecap="round"
+    stroke-dasharray="251.2"
+    stroke-dashoffset="251.2"
+  >
+    <animate 
+      attributeName="stroke-dashoffset"
+      values="251.2;0;-251.2"
+      dur="2s"
+      repeatCount="indefinite"
+    />
+  </circle>
+  
+  <!-- Rotating dots -->
+  <g>
+    <circle cx="50" cy="10" r="3" fill="url(#gradient)">
+      <animateTransform 
+        attributeName="transform"
+        type="rotate"
+        values="0 50 50;360 50 50"
+        dur="2s"
+        repeatCount="indefinite"
+      />
+    </circle>
+    
+    <circle cx="90" cy="50" r="3" fill="url(#gradient)">
+      <animateTransform 
+        attributeName="transform"
+        type="rotate"
+        values="0 50 50;360 50 50"
+        dur="2s"
+        repeatCount="indefinite"
+      />
+    </circle>
+    
+    <circle cx="50" cy="90" r="3" fill="url(#gradient)">
+      <animateTransform 
+        attributeName="transform"
+        type="rotate"
+        values="0 50 50;360 50 50"
+        dur="2s"
+        repeatCount="indefinite"
+      />
+    </circle>
+    
+    <circle cx="10" cy="50" r="3" fill="url(#gradient)">
+      <animateTransform 
+        attributeName="transform"
+        type="rotate"
+        values="0 50 50;360 50 50"
+        dur="2s"
+        repeatCount="indefinite"
+      />
+    </circle>
+  </g>
+</svg>
+```
+
+## Project 4: Animated Icon System
+
+```html
+<svg viewBox="0 0 24 24" width="48" height="48">
+  <!-- Play/Pause Icon -->
+  <g id="play-icon">
+    <polygon points="8,5 8,19 19,12" fill="currentColor">
+      <animate 
+        attributeName="points"
+        values="
+          8,5 8,19 19,12;
+          6,5 6,19 10,19 10,5;
+          8,5 8,19 19,12
+        "
+        dur="0.3s"
+        begin="click"
+        fill="freeze"
+      />
+    </polygon>
+  </g>
+  
+  <!-- Volume Icon -->
+  <g id="volume-icon" transform="translate(0, 0)">
+    <path d="M11 5L6 9H2v6h4l5 4V5z" fill="currentColor"/>
+    <path d="M15.54 8.46a5 5 0 0 1 0 7.07" fill="none" stroke="currentColor" stroke-width="2">
+      <animate 
+        attributeName="d"
+        values="
+          M15.54 8.46 a5 5 0 0 1 0 7.07;
+          M15.54 8.46 a5 5 0 0 1 0 7.07 M19.07 4.93 a9 9 0 0 1 0 14.14;
+          M15.54 8.46 a5 5 0 0 1 0 7.07
+        "
+        dur="0.3s"
+        begin="click"
+        fill="freeze"
+      />
+    </path>
+  </g>
+</svg>
+```
+
+## Key Takeaways
+
+1. **SMIL can animate any SVG attribute** that CSS cannot
+2. **Path morphing** is possible with SMIL's `d` attribute animation
+3. **Complex timing** can be achieved with `keyTimes` and `keySplines`
+4. **Event-based animations** allow for interactive experiences
+5. **SMIL works seamlessly** with React and other frameworks
+6. **Orchestration** enables complex multi-element animations
+7. **Performance** is excellent for complex animations
+
+## Next Steps
+
+You're now ready to explore **Module 4: Path and Path Animations** where you'll learn advanced path manipulation techniques, including drawing animations, motion along paths, and complex path morphing. 

@@ -1,0 +1,47 @@
+# Coordinate System
+
+## Understanding Coordinates
+
+SVGs use a **coordinate system** where:
+- Origin (0,0) is at the **top-left corner**
+- X-axis increases **rightward**
+- Y-axis increases **downward**
+- Units are **user units** (scalable)
+
+## ViewBox - The SVG Camera
+
+The `viewBox` attribute acts like a camera, determining which part of the infinite SVG canvas is visible:
+
+```html
+<svg viewBox="0 0 100 100">
+  <!-- Shows a 100x100 area starting at (0,0) -->
+</svg>
+
+<svg viewBox="50 50 100 100">
+  <!-- Shows a 100x100 area starting at (50,50) -->
+</svg>
+```
+
+**ViewBox Syntax:**
+```html
+<svg viewBox="x y width height">
+```
+
+- `x`: X-coordinate of top-left visible region
+- `y`: Y-coordinate of top-left visible region  
+- `width`: Width of visible region
+- `height`: Height of visible region
+
+## Responsive SVGs
+
+ViewBox makes SVGs responsive - they scale to any size while maintaining proportions:
+
+```html
+<svg viewBox="0 0 24 24" width="16" height="16">
+  <!-- 16px icon -->
+</svg>
+
+<svg viewBox="0 0 24 24" width="128" height="128">
+  <!-- 128px icon - same proportions -->
+</svg>
+``` 

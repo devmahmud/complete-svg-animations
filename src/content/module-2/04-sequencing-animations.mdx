@@ -1,0 +1,62 @@
+# Sequencing Animations
+
+## Staggered Animations
+
+Create sequences by delaying animations:
+
+```html
+<svg viewBox="0 0 200 100">
+  <circle class="dot" cx="30" cy="50" r="10" fill="red"/>
+  <circle class="dot" cx="70" cy="50" r="10" fill="green"/>
+  <circle class="dot" cx="110" cy="50" r="10" fill="blue"/>
+  <circle class="dot" cx="150" cy="50" r="10" fill="purple"/>
+</svg>
+```
+
+```css
+.dot {
+  animation: bounce 1s ease-in-out infinite;
+}
+
+.dot:nth-child(1) { animation-delay: 0s; }
+.dot:nth-child(2) { animation-delay: 0.1s; }
+.dot:nth-child(3) { animation-delay: 0.2s; }
+.dot:nth-child(4) { animation-delay: 0.3s; }
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+}
+```
+
+## Complex Sequencing
+
+```html
+<svg viewBox="0 0 100 100">
+  <g class="loading-spinner">
+    <circle cx="50" cy="50" r="40" fill="none" stroke="#e5e7eb" stroke-width="8"/>
+    <circle class="progress" cx="50" cy="50" r="40" fill="none" stroke="#3b82f6" stroke-width="8" stroke-dasharray="251.2" stroke-dashoffset="251.2"/>
+  </g>
+</svg>
+```
+
+```css
+.loading-spinner {
+  animation: spin 2s linear infinite;
+}
+
+.progress {
+  animation: progress 2s ease-in-out infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes progress {
+  0% { stroke-dashoffset: 251.2; }
+  50% { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: -251.2; }
+}
+``` 

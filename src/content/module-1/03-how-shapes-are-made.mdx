@@ -1,0 +1,64 @@
+# How Shapes Are Made
+
+## The Path Model in Action
+
+When you draw a shape on paper, you typically:
+1. Draw the outline first
+2. Color it in or leave it as an outline
+3. Adjust the thickness of your pen/marker
+
+SVGs work exactly the same way:
+
+```html
+<!-- Just the outline -->
+<rect 
+  x="20" 
+  y="20" 
+  width="60" 
+  height="40" 
+  fill="none"
+  stroke="white"
+  stroke-width="3"
+/>
+
+<!-- Filled shape -->
+<rect 
+  x="20" 
+  y="20" 
+  width="60" 
+  height="40" 
+  fill="blue"
+  stroke="white"
+  stroke-width="3"
+/>
+```
+
+## Building Complex Shapes
+
+Complex icons are built by combining multiple simple shapes:
+
+```html
+<!-- Monitor icon example -->
+<svg viewBox="0 0 100 100">
+  <!-- Screen (rectangle outline) -->
+  <rect 
+    x="20" 
+    y="20" 
+    width="60" 
+    height="40" 
+    fill="none"
+    stroke="white"
+    stroke-width="3"
+  />
+  
+  <!-- Base (line) -->
+  <line 
+    x1="35" 
+    y1="80" 
+    x2="65" 
+    y2="80" 
+    stroke="white"
+    stroke-width="2"
+  />
+</svg>
+``` 

@@ -1,0 +1,99 @@
+# SMIL and React
+
+## Using SMIL in React
+
+SMIL animations work seamlessly in React components:
+
+```jsx
+import React from 'react';
+
+const AnimatedSVG = () => {
+  return (
+    <svg viewBox="0 0 100 100" width="200" height="200">
+      <circle cx="50" cy="50" r="20" fill="blue">
+        <animate 
+          attributeName="r"
+          values="20;40;20"
+          dur="2s"
+          repeatCount="indefinite"
+        />
+        <animate 
+          attributeName="fill"
+          values="blue;red;blue"
+          dur="2s"
+          repeatCount="indefinite"
+        />
+      </circle>
+    </svg>
+  );
+};
+
+export default AnimatedSVG;
+```
+
+## Dynamic SMIL with React
+
+```jsx
+import React, { useState } from 'react';
+
+const InteractiveSMIL = () => {
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  return (
+    <div>
+      <button onClick={() => setIsAnimating(!isAnimating)}>
+        {isAnimating ? 'Stop' : 'Start'} Animation
+      </button>
+      
+      <svg viewBox="0 0 100 100" width="200" height="200">
+        <circle cx="50" cy="50" r="20" fill="blue">
+          <animate 
+            attributeName="r"
+            values="20;40;20"
+            dur="1s"
+            repeatCount="indefinite"
+            begin={isAnimating ? "0s" : "indefinite"}
+          />
+        </circle>
+      </svg>
+    </div>
+  );
+};
+
+export default InteractiveSMIL;
+```
+
+## SMIL with React Hooks
+
+```jsx
+import React, { useEffect, useRef } from 'react';
+
+const SMILWithRefs = () => {
+  const svgRef = useRef(null);
+
+  useEffect(() => {
+    // Access SMIL animations programmatically
+    const animations = svgRef.current.querySelectorAll('animate');
+    
+    animations.forEach(anim => {
+      // Control animations via JavaScript
+      anim.beginElement();
+    });
+  }, []);
+
+  return (
+    <svg ref={svgRef} viewBox="0 0 100 100" width="200" height="200">
+      <circle cx="50" cy="50" r="20" fill="blue">
+        <animate 
+          attributeName="r"
+          values="20;40;20"
+          dur="2s"
+          repeatCount="indefinite"
+        />
+      </circle>
+    </svg>
+  );
+};
+
+export default SMILWithRefs;
+``` 

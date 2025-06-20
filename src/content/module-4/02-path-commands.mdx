@@ -1,0 +1,82 @@
+# Path Commands
+
+## Command Overview
+
+Path commands are single letters followed by coordinates. Commands can be **absolute** (capital letters) or **relative** (lowercase letters).
+
+## Line Commands
+
+```html
+<!-- Move to (absolute) -->
+<path d="M 10 10" />
+
+<!-- Move to (relative) -->
+<path d="m 10 10" />
+
+<!-- Line to (absolute) -->
+<path d="M 10 10 L 90 90" />
+
+<!-- Line to (relative) -->
+<path d="M 10 10 l 80 80" />
+
+<!-- Horizontal line -->
+<path d="M 10 10 H 90" />
+
+<!-- Vertical line -->
+<path d="M 10 10 V 90" />
+```
+
+## Curve Commands
+
+```html
+<!-- Quadratic Bézier curve -->
+<path d="M 10 50 Q 50 10 90 50" />
+
+<!-- Cubic Bézier curve -->
+<path d="M 10 50 C 30 10 70 90 90 50" />
+
+<!-- Smooth quadratic curve -->
+<path d="M 10 50 Q 30 10 50 50 T 90 50" />
+
+<!-- Smooth cubic curve -->
+<path d="M 10 50 C 30 10 70 90 90 50 S 110 10 130 50" />
+```
+
+## Arc Commands
+
+```html
+<!-- Arc -->
+<path d="M 10 50 A 40 40 0 0 1 90 50" />
+```
+
+**Arc Parameters:**
+- `rx, ry`: X and Y radius
+- `x-axis-rotation`: Rotation of the ellipse
+- `large-arc-flag`: 0 for small arc, 1 for large arc
+- `sweep-flag`: 0 for counterclockwise, 1 for clockwise
+- `x, y`: End point
+
+## Close Path
+
+```html
+<!-- Close the path -->
+<path d="M 10 10 L 90 10 L 90 90 L 10 90 Z" />
+```
+
+## Complex Path Example
+
+```html
+<svg viewBox="0 0 200 200">
+  <path 
+    d="M 20 100 
+       Q 50 20 100 100 
+       T 180 100
+       L 180 150
+       Q 100 180 20 150
+       Z"
+    fill="lightblue"
+    stroke="blue"
+    stroke-width="2"
+  />
+</svg>
+``` 

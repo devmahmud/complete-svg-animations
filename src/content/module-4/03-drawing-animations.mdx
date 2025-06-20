@@ -1,0 +1,122 @@
+# Drawing Animations
+
+## Stroke Dasharray Technique
+
+Drawing animations use `stroke-dasharray` and `stroke-dashoffset` to create the illusion of drawing:
+
+```html
+<svg viewBox="0 0 100 100">
+  <path 
+    d="M 10 50 Q 50 10 90 50"
+    fill="none"
+    stroke="blue"
+    stroke-width="3"
+    stroke-linecap="round"
+    stroke-dasharray="100"
+    stroke-dashoffset="100"
+  >
+    <animate 
+      attributeName="stroke-dashoffset"
+      values="100;0"
+      dur="2s"
+      fill="freeze"
+    />
+  </path>
+</svg>
+```
+
+## Calculating Path Length
+
+```html
+<svg viewBox="0 0 100 100">
+  <path 
+    d="M 10 50 Q 50 10 90 50"
+    fill="none"
+    stroke="blue"
+    stroke-width="3"
+    stroke-linecap="round"
+    stroke-dasharray="100"
+    stroke-dashoffset="100"
+    pathLength="100"
+  >
+    <animate 
+      attributeName="stroke-dashoffset"
+      values="100;0"
+      dur="2s"
+      fill="freeze"
+    />
+  </path>
+</svg>
+```
+
+## Multiple Drawing Sequences
+
+```html
+<svg viewBox="0 0 200 100">
+  <!-- First line -->
+  <path 
+    d="M 20 50 L 80 50"
+    fill="none"
+    stroke="red"
+    stroke-width="3"
+    stroke-linecap="round"
+    stroke-dasharray="60"
+    stroke-dashoffset="60"
+  >
+    <animate 
+      attributeName="stroke-dashoffset"
+      values="60;0"
+      dur="1s"
+      begin="0s"
+      fill="freeze"
+    />
+  </path>
+  
+  <!-- Second line -->
+  <path 
+    d="M 120 50 L 180 50"
+    fill="none"
+    stroke="blue"
+    stroke-width="3"
+    stroke-linecap="round"
+    stroke-dasharray="60"
+    stroke-dashoffset="60"
+  >
+    <animate 
+      attributeName="stroke-dashoffset"
+      values="60;0"
+      dur="1s"
+      begin="1s"
+      fill="freeze"
+    />
+  </path>
+</svg>
+```
+
+## Complex Drawing Animation
+
+```html
+<svg viewBox="0 0 100 100">
+  <path 
+    d="M 20 80 
+       Q 20 20 50 20 
+       Q 80 20 80 50 
+       Q 80 80 50 80 
+       Q 20 80 20 50"
+    fill="none"
+    stroke="purple"
+    stroke-width="3"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    stroke-dasharray="300"
+    stroke-dashoffset="300"
+  >
+    <animate 
+      attributeName="stroke-dashoffset"
+      values="300;0"
+      dur="3s"
+      fill="freeze"
+    />
+  </path>
+</svg>
+``` 

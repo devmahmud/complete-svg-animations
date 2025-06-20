@@ -1,0 +1,72 @@
+# Deep Dive into SMIL
+
+## The `<animate>` Element
+
+The most versatile SMIL element for animating any SVG attribute:
+
+```html
+<svg viewBox="0 0 100 100">
+  <rect x="10" y="10" width="80" height="80" fill="red">
+    <animate 
+      attributeName="fill"
+      values="red;blue;green;red"
+      dur="3s"
+      repeatCount="indefinite"
+    />
+  </rect>
+</svg>
+```
+
+## Key Attributes
+
+```html
+<animate 
+  attributeName="cx"           <!-- Attribute to animate -->
+  values="50;100;50"          <!-- Values to animate between -->
+  dur="2s"                    <!-- Duration -->
+  begin="0s"                  <!-- When to start -->
+  repeatCount="indefinite"    <!-- How many times to repeat -->
+  calcMode="linear"           <!-- Interpolation mode -->
+/>
+```
+
+## Animation Modes
+
+```html
+<!-- Linear interpolation -->
+<animate 
+  attributeName="cx"
+  values="50;100"
+  dur="2s"
+  calcMode="linear"
+/>
+
+<!-- Discrete steps -->
+<animate 
+  attributeName="fill"
+  values="red;blue;green"
+  dur="3s"
+  calcMode="discrete"
+/>
+
+<!-- Paced (constant speed) -->
+<animate 
+  attributeName="d"
+  values="M10 10 L90 10;M10 10 Q50 50 90 10"
+  dur="2s"
+  calcMode="paced"
+/>
+```
+
+## Advanced Value Control
+
+```html
+<animate 
+  attributeName="r"
+  values="10;30;10"           <!-- Simple values -->
+  keyTimes="0;0.5;1"          <!-- Control timing -->
+  keySplines="0.4 0 0.6 1;0.4 0 0.6 1"  <!-- Custom easing -->
+  dur="2s"
+  repeatCount="indefinite"
+/>
+``` 

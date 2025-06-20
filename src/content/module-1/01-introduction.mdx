@@ -1,0 +1,24 @@
+# Introduction to SVGs
+
+SVG (Scalable Vector Graphics) is a markup language for images, similar to how HTML is a markup language for documents. All SVGs begin with a root `<svg>` element:
+
+```html
+<svg viewBox="0 0 100 100">
+  <!-- SVG code goes here -->
+</svg>
+```
+
+**Key Concepts:**
+- SVGs are made up of **elements** (shapes)
+- Each element represents a **primitive shape**
+- Shapes are controlled through **attributes**
+- SVGs are **vector-based** and scale infinitely
+- SVGs follow the **path model** - everything is constructed from paths
+
+## The Path Model
+
+Unlike HTML/CSS which uses the **box model**, SVGs use the **path model**:
+- All SVG shapes are constructed from a path
+- Shapes begin with an outline (path)
+- The outline is then colored in or made thicker
+- This creates the final visible shape 
