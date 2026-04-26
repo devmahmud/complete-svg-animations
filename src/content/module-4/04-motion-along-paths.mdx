@@ -1,124 +1,99 @@
 # Motion Along Paths
 
-## The `<animateMotion>` Element
+<Objective>
+- Use `<animateMotion>` to move any element along a path
+- Reuse a path across animations with `<mpath href="#id">`
+- Apply `rotate="auto"` to align an element with the path's tangent
+</Objective>
 
-SMIL's `<animateMotion>` element allows objects to follow path trajectories:
+`<animateMotion>` moves any element along a path's trajectory. The element's own coordinates become offsets relative to the path — set them to (0, 0) so it sits **on** the path.
 
-```html
-<svg viewBox="0 0 200 200">
-  <!-- The path to follow -->
-  <path 
-    d="M 20 100 Q 100 20 180 100"
-    fill="none"
-    stroke="gray"
-    stroke-width="2"
-    stroke-dasharray="5,5"
-  />
-  
-  <!-- The moving object -->
-  <circle r="8" fill="red">
-    <animateMotion 
-      dur="3s"
-      repeatCount="indefinite"
-      path="M 20 100 Q 100 20 180 100"
-    />
+## Smallest example
+
+<LiveSVG code={`<svg viewBox="0 0 200 100">
+  <!-- The track (visible) -->
+  <path id="track" d="M 20 50 Q 100 -10 180 50"
+        fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2" stroke-dasharray="3 3"/>
+
+  <!-- The traveler -->
+  <circle r="6" fill="#7c5cff">
+    <animateMotion dur="3s" repeatCount="indefinite" path="M 20 50 Q 100 -10 180 50"/>
   </circle>
-</svg>
-```
+</svg>`} caption="The path attribute is repeated on the animateMotion. Or use mpath (next demo)." />
 
-## Complex Motion Paths
+## Reuse the path with `<mpath>`
 
-```html
-<svg viewBox="0 0 200 200">
-  <!-- Complex path -->
-  <path 
-    d="M 20 100 
-       C 50 20 150 20 180 100
-       S 150 180 100 150
-       Q 50 120 20 100"
-    fill="none"
-    stroke="gray"
-    stroke-width="2"
-    stroke-dasharray="5,5"
-  />
-  
-  <!-- Moving object with rotation -->
+Cleaner — define the path once, reference it:
+
+<LiveSVG code={`<svg viewBox="0 0 200 100">
+  <path id="track2" d="M 20 50 C 60 -10 140 110 180 50"
+        fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2" stroke-dasharray="3 3"/>
+
+  <circle r="6" fill="#ffd43b">
+    <animateMotion dur="3s" repeatCount="indefinite">
+      <mpath href="#track2"/>
+    </animateMotion>
+  </circle>
+</svg>`} caption="No more duplicated path string." />
+
+## Auto-rotate to face the direction of travel
+
+`rotate="auto"` orients the element along the tangent of the path — perfect for arrows, ships, anything pointed.
+
+<LiveSVG code={`<svg viewBox="0 0 200 100">
+  <path id="track3" d="M 20 50 C 60 0 140 100 180 50"
+        fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2" stroke-dasharray="3 3"/>
+
   <g>
-    <circle r="6" fill="blue"/>
-    <line x1="0" y1="0" x2="0" y2="-12" stroke="blue" stroke-width="2"/>
-    <animateMotion 
-      dur="4s"
-      repeatCount="indefinite"
-      path="M 20 100 C 50 20 150 20 180 100 S 150 180 100 150 Q 50 120 20 100"
-      rotate="auto"
-    />
+    <!-- An arrow pointing right; pivot at its tail -->
+    <polygon points="-8,-4 -8,4 8,0" fill="#7c5cff"/>
+    <animateMotion dur="3s" repeatCount="indefinite" rotate="auto">
+      <mpath href="#track3"/>
+    </animateMotion>
   </g>
-</svg>
+</svg>`} caption="Try rotate='auto-reverse' to flip the orientation." />
+
+## Caravan: stagger with `begin`
+
+<LiveSVG code={`<svg viewBox="0 0 200 100">
+  <path id="track4" d="M 20 50 Q 100 0 180 50" fill="none"
+        stroke="rgba(255,255,255,0.2)" stroke-width="2" stroke-dasharray="3 3"/>
+  <circle r="5" fill="#ff5d73"><animateMotion dur="3s" repeatCount="indefinite" begin="0s"><mpath href="#track4"/></animateMotion></circle>
+  <circle r="5" fill="#7c5cff"><animateMotion dur="3s" repeatCount="indefinite" begin="0.5s"><mpath href="#track4"/></animateMotion></circle>
+  <circle r="5" fill="#ffd43b"><animateMotion dur="3s" repeatCount="indefinite" begin="1s"><mpath href="#track4"/></animateMotion></circle>
+</svg>`} caption="Same path, three offset start times." />
+
+## CSS alternative: `offset-path`
+
+Modern CSS supports the same effect via the `offset-path` property:
+
+```css
+.traveler {
+  offset-path: path('M 20 50 Q 100 0 180 50');
+  animation: glide 3s linear infinite;
+}
+@keyframes glide {
+  to { offset-distance: 100%; }
+}
 ```
 
-## Multiple Objects on Paths
+The CSS approach has better DOM ergonomics; SMIL has wider browser support for complex synchronization.
 
-```html
-<svg viewBox="0 0 200 200">
-  <path 
-    d="M 20 100 Q 100 20 180 100"
-    fill="none"
-    stroke="gray"
-    stroke-width="2"
-    stroke-dasharray="5,5"
-  />
-  
-  <!-- First object -->
-  <circle r="6" fill="red">
-    <animateMotion 
-      dur="2s"
-      repeatCount="indefinite"
-      path="M 20 100 Q 100 20 180 100"
-    />
-  </circle>
-  
-  <!-- Second object (delayed) -->
-  <circle r="6" fill="blue">
-    <animateMotion 
-      dur="2s"
-      begin="1s"
-      repeatCount="indefinite"
-      path="M 20 100 Q 100 20 180 100"
-    />
-  </circle>
-  
-  <!-- Third object (delayed) -->
-  <circle r="6" fill="green">
-    <animateMotion 
-      dur="2s"
-      begin="2s"
-      repeatCount="indefinite"
-      path="M 20 100 Q 100 20 180 100"
-    />
-  </circle>
-</svg>
-```
+<Callout type="warn" title="The element's own x/y matters">
+  If you put <code>cx="50"</code> on the circle and then animate it along a path, every point on the path is offset by (50, 0). For most cases set <code>cx</code>/<code>cy</code> to 0.
+</Callout>
 
-## Path Following with CSS
+<TryIt goal="Move the rocket along the curved path. Add an animateMotion with mpath referencing the track id.">
+<LiveSVG code={`<svg viewBox="0 0 200 100">
+  <path id="track" d="M 20 80 C 60 0 140 0 180 80" fill="none" stroke="rgba(255,255,255,0.15)" stroke-dasharray="3 3"/>
+  <polygon points="-6,-3 -6,3 6,0" fill="#7c5cff">
+    <!-- Add animateMotion with mpath -->
+  </polygon>
+</svg>`} caption="rotate='auto' will keep the rocket pointing forward." />
+</TryIt>
 
-```html
-<svg viewBox="0 0 200 200">
-  <path 
-    id="motionPath"
-    d="M 20 100 Q 100 20 180 100"
-    fill="none"
-    stroke="gray"
-    stroke-width="2"
-    stroke-dasharray="5,5"
-  />
-  
-  <circle r="8" fill="red" style="offset-path: path('M 20 100 Q 100 20 180 100');">
-    <animate 
-      attributeName="offset-distance"
-      values="0;1"
-      dur="3s"
-      repeatCount="indefinite"
-    />
-  </circle>
-</svg>
-``` 
+<Recap takeaways={[
+  "<animateMotion> moves elements along arbitrary paths — CSS can't.",
+  "Use <mpath href='#id'/> to share one path between multiple animators.",
+  "rotate='auto' aligns the element with the path's tangent."
+]} next={{ to: '/module/module-4?lesson=lesson-4-5', label: 'Path Morphing' }} />

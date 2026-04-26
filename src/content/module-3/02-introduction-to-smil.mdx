@@ -1,27 +1,63 @@
 # Introduction to SMIL
 
+<Objective>
+- Write a basic `<animate>` element and pick the right attribute
+- Distinguish the four SMIL elements and what each does
+- Use `<set>` for discrete state changes vs `<animate>` for interpolation
+</Objective>
+
 ## What is SMIL?
 
-SMIL is an XML-based language for describing multimedia presentations. In SVG, it provides powerful animation capabilities through dedicated animation elements.
+**SMIL** (Synchronized Multimedia Integration Language) is SVG's native animation system. It declares animations directly inside the SVG markup — no CSS, no JS, no external timeline. The renderer reads `<animate>` elements and runs them.
 
-## Basic SMIL Structure
+## The smallest SMIL animation
 
-```html
-<svg viewBox="0 0 100 100">
-  <circle cx="50" cy="50" r="20" fill="blue">
-    <animate 
-      attributeName="r"
-      values="20;40;20"
-      dur="2s"
-      repeatCount="indefinite"
-    />
+<LiveSVG code={`<svg viewBox="0 0 100 100">
+  <circle cx="50" cy="50" r="20" fill="#7c5cff">
+    <animate attributeName="r" values="20;40;20" dur="2s" repeatCount="indefinite"/>
   </circle>
-</svg>
-```
+</svg>`} caption="Try changing values to '10;50;10' or dur to '0.6s'." />
 
-## SMIL Animation Elements
+The `<animate>` element lives **inside** the shape it animates. You point it at an attribute (`attributeName`), give it a list of `values`, a duration, and a repeat policy.
 
-1. **`<animate>`** - Animate any attribute
-2. **`<animateTransform>`** - Animate transforms
-3. **`<animateMotion>`** - Follow paths
-4. **`<set>`** - Set discrete values 
+## The four animation elements
+
+| Element | What it does |
+| --- | --- |
+| `<animate>` | Animate any attribute (fill, r, x, opacity, stroke-dashoffset…) |
+| `<animateTransform>` | Animate `transform` — `rotate`, `scale`, `translate`, `skewX/Y` |
+| `<animateMotion>` | Move an element along an arbitrary path |
+| `<set>` | Snap-set an attribute at a moment in time (no interpolation) |
+
+## animateTransform — rotation
+
+<LiveSVG code={`<svg viewBox="0 0 100 100">
+  <rect x="35" y="35" width="30" height="30" fill="#ffd43b">
+    <animateTransform
+      attributeName="transform" type="rotate"
+      from="0 50 50" to="360 50 50"
+      dur="3s" repeatCount="indefinite"/>
+  </rect>
+</svg>`} caption="The third value of from/to is the rotation pivot." />
+
+## set — discrete state changes
+
+<LiveSVG code={`<svg viewBox="0 0 100 100">
+  <circle cx="50" cy="50" r="25" fill="#7c5cff">
+    <set attributeName="fill" to="#3ddc97" begin="1s" dur="1s" fill="freeze"/>
+  </circle>
+</svg>`} caption="Color flips at 1s, freezes at 2s." />
+
+<Callout type="warn" title="SMIL was deprecated, then un-deprecated">
+  Chrome announced SMIL deprecation in 2015, then reversed course. Today SMIL is supported in Chrome, Firefox, Safari, and Edge — but Internet Explorer never shipped it. For modern targets, SMIL is safe and uniquely powerful.
+</Callout>
+
+## When to reach for SMIL
+
+Use SMIL when you need to animate something CSS can't (path `d`, `points`, gradient stops), when you want timing tied to events (`begin="click"`), or when you want animations to live with the SVG so a single file can be embedded anywhere.
+
+<Recap takeaways={[
+  "SMIL animations live INSIDE the shape they animate.",
+  "Four elements: <animate>, <animateTransform>, <animateMotion>, <set>.",
+  "values is the most flexible knob — semicolon-separated keyframe values."
+]} next={{ to: '/module/module-3?lesson=lesson-3-3', label: 'Deep Dive into SMIL' }} />

@@ -1,58 +1,124 @@
 # SMIL Timing Functions
 
-## Built-in Timing Functions
+<Objective>
+- Author per-segment easing with `keySplines`
+- Stay inside the legal `[0, 1]` range that SMIL requires
+- Fake bounce/elastic with extra keyframe overshoot when needed
+</Objective>
 
-SMIL provides several timing functions through `calcMode`:
+CSS gives you `cubic-bezier(x1, y1, x2, y2)` as a one-liner. SMIL is more verbose but lets you pick **a different curve per keyframe segment** — useful for compound animations like "ease in, hold, snap out."
 
-```html
-<!-- Linear (default) -->
-<animate calcMode="linear" />
-
-<!-- Discrete steps -->
-<animate calcMode="discrete" />
-
-<!-- Paced (constant speed) -->
-<animate calcMode="paced" />
-
-<!-- Spline (custom curve) -->
-<animate calcMode="spline" />
-```
-
-## Custom Timing with KeySplines
+## The recipe
 
 ```html
-<animate 
-  attributeName="cx"
-  values="50;100;50"
-  keyTimes="0;0.5;1"
-  keySplines="0.4 0 0.6 1;0.4 0 0.6 1"
-  dur="2s"
-  calcMode="spline"
-/>
-```
-
-## Timing Function Examples
-
-```html
-<!-- Bounce effect -->
-<animate 
+<animate
   attributeName="cy"
   values="50;20;50"
-  keyTimes="0;0.5;1"
-  keySplines="0.68 -0.55 0.265 1.55;0.68 -0.55 0.265 1.55"
-  dur="1s"
+  keyTimes="0; 0.5; 1"
   calcMode="spline"
-  repeatCount="indefinite"
-/>
+  keySplines="0.42 0 0.58 1;
+              0.42 0 0.58 1"
+  dur="2s"
+  repeatCount="indefinite"/>
+```
 
-<!-- Elastic effect -->
-<animate 
-  attributeName="r"
-  values="20;40;20"
-  keyTimes="0;0.5;1"
-  keySplines="0.175 0.885 0.32 1.275;0.175 0.885 0.32 1.275"
-  dur="1s"
-  calcMode="spline"
-  repeatCount="indefinite"
-/>
-``` 
+Three keyframes need **two segments**, so `keySplines` lists two control-point pairs separated by `;`. Each pair is `x1 y1 x2 y2` — the same as CSS `cubic-bezier`.
+
+## Easing comparison
+
+SMIL `keySplines` requires both control points to stay in `[0, 1]`. That covers the standard easing palette but **rules out bounce/elastic** — those need overshoot, which keysplines can't express. The next section shows how to fake bounce with multi-keyframe values.
+
+<LiveSVG code={`<svg viewBox="0 0 320 200">
+  <text x="14" y="24"  fill="#b8bfd0" font-size="11">linear</text>
+  <text x="14" y="64"  fill="#b8bfd0" font-size="11">ease-in</text>
+  <text x="14" y="104" fill="#b8bfd0" font-size="11">ease-out</text>
+  <text x="14" y="144" fill="#b8bfd0" font-size="11">ease-in-out</text>
+  <text x="14" y="184" fill="#b8bfd0" font-size="11">snap (steep)</text>
+
+  <circle cy="20"  r="8" fill="#7c5cff">
+    <animate attributeName="cx" values="100;260;100" dur="2.4s" calcMode="linear" repeatCount="indefinite"/>
+  </circle>
+  <circle cy="60"  r="8" fill="#7c5cff">
+    <animate attributeName="cx" values="100;260;100" dur="2.4s"
+             calcMode="spline" keyTimes="0;0.5;1"
+             keySplines="0.42 0 1 1; 0.42 0 1 1" repeatCount="indefinite"/>
+  </circle>
+  <circle cy="100" r="8" fill="#ffd43b">
+    <animate attributeName="cx" values="100;260;100" dur="2.4s"
+             calcMode="spline" keyTimes="0;0.5;1"
+             keySplines="0 0 0.58 1; 0 0 0.58 1" repeatCount="indefinite"/>
+  </circle>
+  <circle cy="140" r="8" fill="#3ddc97">
+    <animate attributeName="cx" values="100;260;100" dur="2.4s"
+             calcMode="spline" keyTimes="0;0.5;1"
+             keySplines="0.42 0 0.58 1; 0.42 0 0.58 1" repeatCount="indefinite"/>
+  </circle>
+  <circle cy="180" r="8" fill="#ff5d73">
+    <animate attributeName="cx" values="100;260;100" dur="2.4s"
+             calcMode="spline" keyTimes="0;0.5;1"
+             keySplines="0.9 0 0.1 1; 0.9 0 0.1 1" repeatCount="indefinite"/>
+  </circle>
+</svg>`} caption="Same value range, same duration. All keysplines stay in [0, 1]." />
+
+## Faking bounce with extra keyframes
+
+When you need bounce or elastic in SMIL, **add extra keyframes that overshoot the target**, then settle back. The animation interpolates linearly between them, so the overshoot reads as a bounce:
+
+<LiveSVG code={`<svg viewBox="0 0 320 200">
+  <text x="14" y="24"  fill="#b8bfd0" font-size="11">bounce out</text>
+  <text x="14" y="104" fill="#b8bfd0" font-size="11">elastic settle</text>
+
+  <!-- Bounce: overshoot once on each leg -->
+  <circle cy="40" r="8" fill="#ffd43b">
+    <animate attributeName="cx"
+             values="100; 270; 255; 260; 90; 105; 100"
+             keyTimes="0; 0.42; 0.46; 0.5; 0.92; 0.96; 1"
+             dur="2.4s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- Elastic: oscillate around the target a few times -->
+  <circle cy="120" r="8" fill="#3ddc97">
+    <animate attributeName="cx"
+             values="100; 275; 245; 268; 256; 260; 85; 115; 95; 103; 100"
+             keyTimes="0; 0.30; 0.36; 0.42; 0.46; 0.5; 0.80; 0.86; 0.92; 0.96; 1"
+             dur="2.4s" repeatCount="indefinite"/>
+  </circle>
+</svg>`} caption="No keysplines — just extra value/keyTime pairs that overshoot the target." />
+
+## Why per-segment splines matter
+
+With `calcMode="spline"`, each *segment* (the gap between two consecutive `values`) gets its own ease curve. This is more expressive than CSS — you can say "ease into the peak, then snap out":
+
+<LiveSVG code={`<svg viewBox="0 0 100 100">
+  <circle cx="50" cy="80" r="10" fill="#7c5cff">
+    <animate attributeName="cy"
+             values="80; 30; 80"
+             keyTimes="0; 0.4; 1"
+             calcMode="spline"
+             keySplines="0.2 0.8 0.2 1;
+                         0.7 0 0.9 0.5"
+             dur="1.6s" repeatCount="indefinite"/>
+  </circle>
+</svg>`} caption="Float up gracefully, then drop fast — two distinct curves on one animation." />
+
+## Discrete: when interpolation would be wrong
+
+`calcMode="discrete"` snaps between values. Useful for things that shouldn't smoothly interpolate — like text, named colors, or sprite frames.
+
+<LiveSVG code={`<svg viewBox="0 0 100 100">
+  <circle cx="50" cy="50" r="20">
+    <animate attributeName="fill"
+             values="#7c5cff;#ffd43b;#3ddc97;#ff5d73;#7c5cff"
+             dur="2s" calcMode="discrete" repeatCount="indefinite"/>
+  </circle>
+</svg>`} caption="Color flips with no in-between blends." />
+
+<Callout type="tip" title="Cheat sheet">
+  Need ease-in-out? <code>calcMode="spline"</code> with <code>0.42 0 0.58 1</code>. Ease-in: <code>0.42 0 1 1</code>. Ease-out: <code>0 0 0.58 1</code>. Snap: <code>0.9 0 0.1 1</code>. SMIL keysplines must stay in <code>[0, 1]</code> — for bounce/elastic, add overshoot <em>keyframes</em> instead.
+</Callout>
+
+<Recap takeaways={[
+  "keySplines applies per-segment cubic-bezier easing to your values.",
+  "Both control points must stay in [0, 1] — out-of-range values cause silent failures.",
+  "Bounce and elastic don't fit in keysplines; add overshoot keyframes instead."
+]} next={{ to: '/module/module-3?lesson=lesson-3-5', label: 'Orchestrating SMIL' }} />

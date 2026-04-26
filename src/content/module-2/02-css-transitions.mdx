@@ -1,58 +1,51 @@
 # CSS Transitions
 
-## Basic Hover Effects
+<Objective>
+- Add a `transition` rule and a `:hover` state to animate between two values
+- Animate any animatable SVG attribute (fill, r, transform…)
+- Decide between `transition` (state change) and `@keyframes` (loop)
+</Objective>
 
-The simplest way to animate SVGs is with CSS transitions on hover:
+The simplest path to motion: a `transition` rule plus a `:hover` (or any pseudo-class) target. The browser interpolates between the two states.
 
-```html
-<svg viewBox="0 0 100 100">
-  <circle 
-    cx="50" 
-    cy="50" 
-    r="30" 
-    fill="blue"
-    class="hover-circle"
-  />
+## Hover an SVG attribute
+
+<LiveSVG code={`<svg viewBox="0 0 100 100">
+  <circle cx="50" cy="50" r="30" class="dot"/>
 </svg>
-```
+
+<style>
+.dot {
+  fill: #7c5cff;
+  transition: fill 0.3s ease, r 0.3s ease;
+}
+.dot:hover {
+  fill: #ffd43b;
+  r: 40;
+}
+</style>`} caption="Hover the preview." />
+
+CSS can animate **most** SVG attributes — `fill`, `stroke`, `stroke-width`, `r`, `cx`, `cy`, `opacity`, and any `transform`. The exceptions (path `d`, `points`, gradient stops) are why SMIL exists — see Module 3.
+
+## Multiple properties at once
 
 ```css
-.hover-circle {
-  transition: fill 0.3s ease;
-}
-
-.hover-circle:hover {
-  fill: red;
-}
-```
-
-## Transition Properties
-
-You can animate most SVG attributes with CSS:
-
-```css
-.svg-element {
-  /* Animate fill color */
-  transition: fill 0.3s ease;
-  
-  /* Animate stroke */
-  transition: stroke 0.3s ease, stroke-width 0.3s ease;
-  
-  /* Animate opacity */
-  transition: opacity 0.3s ease;
-  
-  /* Animate multiple properties */
-  transition: fill 0.3s ease, stroke 0.3s ease, opacity 0.3s ease;
+.shape {
+  transition:
+    fill 0.3s ease,
+    stroke 0.3s ease,
+    transform 0.3s ease;
 }
 ```
 
-## Interactive Button Example
+Each property gets its own duration and easing.
 
-```html
-<button class="delete-btn">
-  <svg viewBox="0 0 24 24" width="24" height="24">
+## A practical example: animated trash button
+
+<LiveSVG code={`<button class="delete-btn">
+  <svg viewBox="0 0 24 24" width="20" height="20" stroke="white" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
     <g class="trash-body">
-      <polygon points="6 8, 7 20, 17 20, 18 8"/>
+      <polygon points="6,8 7,20 17,20 18,8"/>
       <line x1="14" y1="11" x2="14" y2="17"/>
       <line x1="10" y1="11" x2="10" y2="17"/>
     </g>
@@ -63,32 +56,36 @@ You can animate most SVG attributes with CSS:
   </svg>
   Delete
 </button>
-```
 
-```css
+<style>
 .delete-btn {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 16px;
-  background: #dc2626;
+  padding: 10px 18px;
+  background: #ff5d73;
   color: white;
-  border: none;
-  border-radius: 20px;
+  border: 0;
+  border-radius: 999px;
+  font: 600 14px/1 'Inter', sans-serif;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: background 0.2s ease, transform 0.2s ease;
 }
+.delete-btn:hover { background: #e94962; transform: translateY(-1px); }
+.trash-lid { transform-origin: 12px 8px; transition: transform 0.25s cubic-bezier(.2,.7,.2,1); }
+.delete-btn:hover .trash-lid { transform: translateY(-2px) rotate(-12deg); }
+</style>`} height={320} caption="The lid lifts because the <g> can be transformed independently of the body." />
 
-.delete-btn:hover {
-  background: #b91c1c;
-}
+<Callout type="tip" title="Why transform a `<g>`?">
+  Wrapping shapes in a `<g>` lets you transition the whole sub-tree as one unit — and you don't pay the cost of animating each child's `x`/`y` separately.
+</Callout>
 
-.trash-lid {
-  transition: transform 0.2s ease;
-  transform-origin: 50% 8px;
-}
+## Transitions vs. animations
 
-.delete-btn:hover .trash-lid {
-  transform: translateY(-2px);
-}
-``` 
+A `transition` runs once when a property changes. A `@keyframes` animation runs on a schedule (looping if you want). Reach for transitions for state changes (hover, focus, toggle) and keyframes for ambient motion (pulse, spinner, idle wiggle).
+
+<Recap takeaways={[
+  "transition + :hover = the simplest possible animation.",
+  "Any animatable property animates: fill, stroke, r, opacity, transform, more.",
+  "Group elements with <g> to transition them as a single unit."
+]} next={{ to: '/module/module-2?lesson=lesson-2-3', label: 'CSS Transforms' }} />

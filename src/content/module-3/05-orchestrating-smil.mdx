@@ -1,121 +1,92 @@
 # Orchestrating SMIL
 
-## Sequential Animations
+<Objective>
+- Chain animations with `begin="anim.end"` references
+- Trigger animations on user events (click, mouseover)
+- Run multiple animations in parallel on a shared clock
+</Objective>
+
+The `begin` attribute is SMIL's superpower. It accepts:
+
+- **time offsets** — `"0.5s"`, `"2s"`
+- **other animations** — `"anim1.end"`, `"anim2.begin+0.5s"`
+- **events** — `"trigger.click"`, `"target.mouseover"`
+
+That alone covers sequential timelines, parallel runs, event-driven UI, and nested loops — without any JavaScript.
+
+## Parallel: same `begin`, different attrs
+
+<LiveSVG code={`<svg viewBox="0 0 100 100">
+  <circle cx="50" cy="50" r="20" fill="#7c5cff">
+    <animate attributeName="r"       values="20;40;20" dur="2s" repeatCount="indefinite"/>
+    <animate attributeName="fill"    values="#7c5cff;#ffd43b;#7c5cff" dur="2s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="1;0.5;1" dur="2s" repeatCount="indefinite"/>
+  </circle>
+</svg>`} caption="All three animations share the same 2s clock. Pulses synchronously." />
+
+## Sequential: chained `begin`
+
+Each `<animate>` can declare its `id`. Other animations reference that id with `.begin` or `.end`:
+
+<LiveSVG code={`<svg viewBox="0 0 100 100">
+  <circle cx="20" cy="50" r="15" fill="#7c5cff">
+    <animate id="grow"  attributeName="r"  values="15;30" dur="0.6s" begin="0s" fill="freeze"/>
+    <animate id="slide" attributeName="cx" values="20;80" dur="0.8s" begin="grow.end" fill="freeze"/>
+    <animate            attributeName="fill" values="#7c5cff;#3ddc97" dur="0.4s" begin="slide.end" fill="freeze"/>
+  </circle>
+</svg>`} caption="Three animations chained: grow → slide → recolor. No timer math, just chains." />
+
+## Event-driven
+
+`begin="elementId.click"` makes the animation fire when the user clicks. Combine with `begin="elementId.mouseover"` for hover effects.
+
+<LiveSVG code={`<svg viewBox="0 0 200 100">
+  <circle id="btn" cx="40" cy="50" r="22" fill="#ffd43b" style="cursor:pointer">
+    <animate attributeName="r" values="22;30;22" dur="0.4s" begin="btn.click"/>
+  </circle>
+  <text x="80" y="55" fill="#b8bfd0" font-size="11">click me ←</text>
+</svg>`} caption="Click the yellow circle. SMIL handles the event natively." />
+
+## Conducting a chorus line
+
+Pure offset staggering — three identical animations with different `begin` delays:
+
+<LiveSVG code={`<svg viewBox="0 0 200 100">
+  <circle cx="50"  cy="50" r="10" fill="#7c5cff">
+    <animate attributeName="cy" values="50;20;50" dur="1.2s" begin="0s"   repeatCount="indefinite"/>
+  </circle>
+  <circle cx="100" cy="50" r="10" fill="#ffd43b">
+    <animate attributeName="cy" values="50;20;50" dur="1.2s" begin="0.2s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="150" cy="50" r="10" fill="#3ddc97">
+    <animate attributeName="cy" values="50;20;50" dur="1.2s" begin="0.4s" repeatCount="indefinite"/>
+  </circle>
+</svg>`} caption="The classic three-dot loader, all SMIL." />
+
+## Multiple triggers
+
+`begin` accepts a **list** — any one of them starts the animation:
 
 ```html
-<svg viewBox="0 0 100 100">
-  <circle cx="50" cy="50" r="20" fill="blue">
-    <!-- First animation -->
-    <animate 
-      attributeName="r"
-      values="20;40"
-      dur="1s"
-      begin="0s"
-    />
-    
-    <!-- Second animation starts after first -->
-    <animate 
-      attributeName="fill"
-      values="blue;red"
-      dur="1s"
-      begin="1s"
-    />
-    
-    <!-- Third animation starts after second -->
-    <animate 
-      attributeName="cx"
-      values="50;80"
-      dur="1s"
-      begin="2s"
-    />
-  </circle>
-</svg>
+<animate begin="el.click; el.mouseover; 5s" .../>
 ```
 
-## Parallel Animations
+This animation runs on click, on hover, OR automatically after 5 seconds. Whichever comes first.
+
+## Restarting
+
+By default, animations don't restart on a repeated trigger if they're still running. Add `restart="always"` to force re-trigger:
 
 ```html
-<svg viewBox="0 0 100 100">
-  <circle cx="50" cy="50" r="20" fill="blue">
-    <!-- All animations start at the same time -->
-    <animate 
-      attributeName="r"
-      values="20;40;20"
-      dur="2s"
-      repeatCount="indefinite"
-    />
-    
-    <animate 
-      attributeName="fill"
-      values="blue;red;blue"
-      dur="2s"
-      repeatCount="indefinite"
-    />
-    
-    <animate 
-      attributeName="opacity"
-      values="1;0.5;1"
-      dur="2s"
-      repeatCount="indefinite"
-    />
-  </circle>
-</svg>
+<animate restart="always" begin="btn.click" .../>
 ```
 
-## Event-Based Animations
+<Callout type="tip" title="The mental model: SMIL is a graph">
+  Each animation is a node; <code>begin</code> references are edges. With offsets, end-tracking, and event triggers you can describe complex interactive sequences declaratively. Keep the IDs short and the references local — it stays readable.
+</Callout>
 
-```html
-<svg viewBox="0 0 100 100">
-  <circle id="trigger" cx="25" cy="50" r="15" fill="green"/>
-  
-  <circle cx="75" cy="50" r="20" fill="blue">
-    <animate 
-      attributeName="r"
-      values="20;40;20"
-      dur="1s"
-      begin="trigger.click"
-    />
-  </circle>
-</svg>
-```
-
-## Complex Orchestration
-
-```html
-<svg viewBox="0 0 200 100">
-  <!-- Background -->
-  <rect x="0" y="0" width="200" height="100" fill="#f0f0f0"/>
-  
-  <!-- Animated elements -->
-  <g>
-    <circle cx="50" cy="50" r="15" fill="red">
-      <animate 
-        attributeName="cy"
-        values="50;30;50"
-        dur="2s"
-        repeatCount="indefinite"
-      />
-    </circle>
-    
-    <circle cx="100" cy="50" r="15" fill="green">
-      <animate 
-        attributeName="cy"
-        values="50;30;50"
-        dur="2s"
-        begin="1s"
-        repeatCount="indefinite"
-      />
-    </circle>
-    
-    <circle cx="150" cy="50" r="15" fill="blue">
-      <animate 
-        attributeName="cy"
-        values="50;30;50"
-        dur="2s"
-        begin="2s"
-        repeatCount="indefinite"
-      />
-    </circle>
-  </g>
-</svg>
-``` 
+<Recap takeaways={[
+  "begin accepts time offsets, animation references (anim.end), and DOM events.",
+  "Multiple begin values run as a logical OR — whichever fires first wins.",
+  "restart='always' lets a triggered animation re-fire while it's still running."
+]} next={{ to: '/module/module-3?lesson=lesson-3-6', label: 'SMIL and React' }} />

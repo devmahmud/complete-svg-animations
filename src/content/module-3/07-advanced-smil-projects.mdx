@@ -1,249 +1,111 @@
 # Advanced SMIL Projects
 
-## Project 1: Morphing Shapes
+<Objective>
+- Combine `<animate>`, `<animateTransform>`, and gradient-stop animation in one SVG
+- Stagger entrance animations with `from`/`to` and `begin` offsets
+- Drive interactive transitions via `begin="click"`
+</Objective>
 
-Create shapes that morph between different forms:
+Four projects that push SMIL — morphing geometry, animated data viz, layered loaders, and gradient stop animation. Each is a recipe; rip out the colors and shapes for your own work.
 
-```html
-<svg viewBox="0 0 100 100" width="300" height="300">
-  <path fill="blue" stroke="black" stroke-width="2">
-    <!-- Start as a circle -->
-    <animate 
-      attributeName="d"
-      values="
-        M 50 20 A 30 30 0 1 1 50 80 A 30 30 0 1 1 50 20;
-        M 20 50 L 80 50 L 50 20 Z;
-        M 20 20 L 80 20 L 80 80 L 20 80 Z;
-        M 50 20 A 30 30 0 1 1 50 80 A 30 30 0 1 1 50 20
-      "
-      dur="4s"
-      repeatCount="indefinite"
-    />
+## Project 1: Shape morph (circle → triangle → square → circle)
+
+The morph rule from Module 4 applies: **same number of commands per keyframe**. Padding shorter shapes with redundant points keeps the morph smooth.
+
+<LiveSVG code={`<svg viewBox="0 0 100 100">
+  <path fill="#7c5cff" stroke="#ffd43b" stroke-width="2" stroke-linejoin="round">
+    <animate attributeName="d"
+             values="M 50 20 C 70 20, 80 30, 80 50 C 80 70, 70 80, 50 80 C 30 80, 20 70, 20 50 C 20 30, 30 20, 50 20 Z;
+                     M 50 20 L 80 70 L 80 70 L 50 80 L 20 70 L 20 70 L 50 20 Z;
+                     M 20 20 L 80 20 L 80 80 L 80 80 L 20 80 L 20 80 L 20 20 Z;
+                     M 50 20 C 70 20, 80 30, 80 50 C 80 70, 70 80, 50 80 C 30 80, 20 70, 20 50 C 20 30, 30 20, 50 20 Z"
+             dur="6s" repeatCount="indefinite" calcMode="spline"
+             keyTimes="0; 0.33; 0.66; 1"
+             keySplines="0.4 0 0.2 1; 0.4 0 0.2 1; 0.4 0 0.2 1"/>
   </path>
-</svg>
-```
+</svg>`} caption="Each keyframe has 7 segments. Spline easing keeps it organic." />
 
-## Project 2: Animated Data Visualization
+## Project 2: Animated bar chart on enter
 
-Create an animated chart:
+Bars rise from the baseline, staggered. `from`/`to` form is enough since each bar only goes one direction.
 
-```html
-<svg viewBox="0 0 200 100" width="400" height="200">
-  <!-- Background -->
-  <rect x="0" y="0" width="200" height="100" fill="#f8f9fa"/>
-  
-  <!-- Grid lines -->
-  <line x1="0" y1="25" x2="200" y2="25" stroke="#dee2e6" stroke-width="1"/>
-  <line x1="0" y1="50" x2="200" y2="50" stroke="#dee2e6" stroke-width="1"/>
-  <line x1="0" y1="75" x2="200" y2="75" stroke="#dee2e6" stroke-width="1"/>
-  
-  <!-- Animated bars -->
-  <rect x="20" y="80" width="20" height="0" fill="#007bff">
-    <animate 
-      attributeName="height"
-      values="0;60"
-      dur="2s"
-      begin="0s"
-    />
-    <animate 
-      attributeName="y"
-      values="80;20"
-      dur="2s"
-      begin="0s"
-    />
+<LiveSVG code={`<svg viewBox="0 0 200 100">
+  <line x1="0" y1="90" x2="200" y2="90" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+
+  <rect x="20"  width="20" fill="#7c5cff" y="90" height="0">
+    <animate attributeName="y"      from="90" to="30" dur="0.8s" begin="0s"   fill="freeze"/>
+    <animate attributeName="height" from="0"  to="60" dur="0.8s" begin="0s"   fill="freeze"/>
   </rect>
-  
-  <rect x="60" y="80" width="20" height="0" fill="#28a745">
-    <animate 
-      attributeName="height"
-      values="0;40"
-      dur="2s"
-      begin="0.5s"
-    />
-    <animate 
-      attributeName="y"
-      values="80;40"
-      dur="2s"
-      begin="0.5s"
-    />
+  <rect x="60"  width="20" fill="#ffd43b" y="90" height="0">
+    <animate attributeName="y"      from="90" to="50" dur="0.8s" begin="0.2s" fill="freeze"/>
+    <animate attributeName="height" from="0"  to="40" dur="0.8s" begin="0.2s" fill="freeze"/>
   </rect>
-  
-  <rect x="100" y="80" width="20" height="0" fill="#ffc107">
-    <animate 
-      attributeName="height"
-      values="0;80"
-      dur="2s"
-      begin="1s"
-    />
-    <animate 
-      attributeName="y"
-      values="80;0"
-      dur="2s"
-      begin="1s"
-    />
+  <rect x="100" width="20" fill="#3ddc97" y="90" height="0">
+    <animate attributeName="y"      from="90" to="10" dur="0.8s" begin="0.4s" fill="freeze"/>
+    <animate attributeName="height" from="0"  to="80" dur="0.8s" begin="0.4s" fill="freeze"/>
   </rect>
-  
-  <rect x="140" y="80" width="20" height="0" fill="#dc3545">
-    <animate 
-      attributeName="height"
-      values="0;30"
-      dur="2s"
-      begin="1.5s"
-    />
-    <animate 
-      attributeName="y"
-      values="80;50"
-      dur="2s"
-      begin="1.5s"
-    />
+  <rect x="140" width="20" fill="#ff5d73" y="90" height="0">
+    <animate attributeName="y"      from="90" to="60" dur="0.8s" begin="0.6s" fill="freeze"/>
+    <animate attributeName="height" from="0"  to="30" dur="0.8s" begin="0.6s" fill="freeze"/>
   </rect>
-</svg>
-```
+</svg>`} caption="200ms stagger between bars. fill='freeze' keeps the final state." />
 
-## Project 3: Interactive Loading Spinner
+## Project 3: Multi-layer loader with animated gradient stops
 
-```html
-<svg viewBox="0 0 100 100" width="200" height="200">
+Gradient stops are pure SMIL territory — CSS can't touch them.
+
+<LiveSVG code={`<svg viewBox="0 0 100 100">
   <defs>
-    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#007bff">
-        <animate 
-          attributeName="stop-color"
-          values="#007bff;#28a745;#ffc107;#dc3545;#007bff"
-          dur="3s"
-          repeatCount="indefinite"
-        />
+    <linearGradient id="rainbow" x1="0%" x2="100%">
+      <stop offset="0%" stop-color="#7c5cff">
+        <animate attributeName="stop-color"
+                 values="#7c5cff;#3ddc97;#ffd43b;#ff5d73;#7c5cff"
+                 dur="4s" repeatCount="indefinite"/>
       </stop>
-      <stop offset="100%" stop-color="#6f42c1">
-        <animate 
-          attributeName="stop-color"
-          values="#6f42c1;#fd7e14;#e83e8c;#20c997;#6f42c1"
-          dur="3s"
-          repeatCount="indefinite"
-        />
+      <stop offset="100%" stop-color="#ffd43b">
+        <animate attributeName="stop-color"
+                 values="#ffd43b;#ff5d73;#7c5cff;#3ddc97;#ffd43b"
+                 dur="4s" repeatCount="indefinite"/>
       </stop>
     </linearGradient>
   </defs>
-  
-  <!-- Background circle -->
-  <circle cx="50" cy="50" r="40" fill="none" stroke="#e9ecef" stroke-width="8"/>
-  
-  <!-- Animated progress circle -->
-  <circle 
-    cx="50" 
-    cy="50" 
-    r="40" 
-    fill="none" 
-    stroke="url(#gradient)" 
-    stroke-width="8"
-    stroke-linecap="round"
-    stroke-dasharray="251.2"
-    stroke-dashoffset="251.2"
-  >
-    <animate 
-      attributeName="stroke-dashoffset"
-      values="251.2;0;-251.2"
-      dur="2s"
-      repeatCount="indefinite"
-    />
+
+  <circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="6"/>
+  <circle cx="50" cy="50" r="40" fill="none" stroke="url(#rainbow)" stroke-width="6"
+          stroke-linecap="round" stroke-dasharray="251.2" stroke-dashoffset="251.2">
+    <animate attributeName="stroke-dashoffset" values="251.2;0;-251.2" dur="2s" repeatCount="indefinite"/>
+    <animateTransform attributeName="transform" type="rotate"
+                      from="0 50 50" to="360 50 50" dur="2s" repeatCount="indefinite"/>
   </circle>
-  
-  <!-- Rotating dots -->
-  <g>
-    <circle cx="50" cy="10" r="3" fill="url(#gradient)">
-      <animateTransform 
-        attributeName="transform"
-        type="rotate"
-        values="0 50 50;360 50 50"
-        dur="2s"
-        repeatCount="indefinite"
-      />
-    </circle>
-    
-    <circle cx="90" cy="50" r="3" fill="url(#gradient)">
-      <animateTransform 
-        attributeName="transform"
-        type="rotate"
-        values="0 50 50;360 50 50"
-        dur="2s"
-        repeatCount="indefinite"
-      />
-    </circle>
-    
-    <circle cx="50" cy="90" r="3" fill="url(#gradient)">
-      <animateTransform 
-        attributeName="transform"
-        type="rotate"
-        values="0 50 50;360 50 50"
-        dur="2s"
-        repeatCount="indefinite"
-      />
-    </circle>
-    
-    <circle cx="10" cy="50" r="3" fill="url(#gradient)">
-      <animateTransform 
-        attributeName="transform"
-        type="rotate"
-        values="0 50 50;360 50 50"
-        dur="2s"
-        repeatCount="indefinite"
-      />
-    </circle>
-  </g>
-</svg>
-```
+</svg>`} caption="Rotation + dashoffset + animated gradient stops = a loader that's never the same shade twice." />
 
-## Project 4: Animated Icon System
+## Project 4: Click-to-toggle play / pause icon
 
-```html
-<svg viewBox="0 0 24 24" width="48" height="48">
-  <!-- Play/Pause Icon -->
-  <g id="play-icon">
-    <polygon points="8,5 8,19 19,12" fill="currentColor">
-      <animate 
-        attributeName="points"
-        values="
-          8,5 8,19 19,12;
-          6,5 6,19 10,19 10,5;
-          8,5 8,19 19,12
-        "
-        dur="0.3s"
-        begin="click"
-        fill="freeze"
-      />
-    </polygon>
-  </g>
-  
-  <!-- Volume Icon -->
-  <g id="volume-icon" transform="translate(0, 0)">
-    <path d="M11 5L6 9H2v6h4l5 4V5z" fill="currentColor"/>
-    <path d="M15.54 8.46a5 5 0 0 1 0 7.07" fill="none" stroke="currentColor" stroke-width="2">
-      <animate 
-        attributeName="d"
-        values="
-          M15.54 8.46 a5 5 0 0 1 0 7.07;
-          M15.54 8.46 a5 5 0 0 1 0 7.07 M19.07 4.93 a9 9 0 0 1 0 14.14;
-          M15.54 8.46 a5 5 0 0 1 0 7.07
-        "
-        dur="0.3s"
-        begin="click"
-        fill="freeze"
-      />
-    </path>
-  </g>
-</svg>
-```
+`begin="click"` on the SVG itself, plus alternating `points` lists.
 
-## Key Takeaways
+<LiveSVG code={`<svg viewBox="0 0 24 24" width="48" height="48" style="cursor:pointer">
+  <polygon fill="#7c5cff"
+           points="8,5 8,19 19,12">
+    <animate attributeName="points"
+             values="8,5 8,19 19,12; 7,5 7,19 11,19 11,5"
+             dur="0.25s" begin="click" fill="freeze"
+             keyTimes="0; 1" calcMode="spline" keySplines="0.2 0.8 0.2 1"/>
+    <animate attributeName="points"
+             values="7,5 7,19 11,19 11,5; 8,5 8,19 19,12"
+             dur="0.25s" begin="click+0.5s" fill="freeze"
+             keyTimes="0; 1" calcMode="spline" keySplines="0.2 0.8 0.2 1"/>
+  </polygon>
+</svg>`} caption="Click the triangle. Two chained animations toggle play ↔ pause via points morphing." />
 
-1. **SMIL can animate any SVG attribute** that CSS cannot
-2. **Path morphing** is possible with SMIL's `d` attribute animation
-3. **Complex timing** can be achieved with `keyTimes` and `keySplines`
-4. **Event-based animations** allow for interactive experiences
-5. **SMIL works seamlessly** with React and other frameworks
-6. **Orchestration** enables complex multi-element animations
-7. **Performance** is excellent for complex animations
+## Key takeaways
 
-## Next Steps
+1. **`<animate attributeName="d">`** unlocks shape morphing CSS can't do.
+2. **Animated gradient stops** are exclusive SMIL territory.
+3. **`from`/`to`** suffices for one-direction reveals; `values` for multi-step morphs.
+4. **`fill="freeze"`** is mandatory for one-shot reveals.
+5. **`begin="elementId.event"`** drives interactive sequences without JavaScript.
+6. **Compose freely** — multiple `<animate>` elements on one shape, multiple shapes on one timeline.
 
-You're now ready to explore **Module 4: Path and Path Animations** where you'll learn advanced path manipulation techniques, including drawing animations, motion along paths, and complex path morphing. 
+## What's next
+
+Module 4 takes paths even further — drawing animations with `stroke-dashoffset`, motion along arbitrary paths, advanced morphing, and production patterns like animated checkmarks, breathing spinners, and reveal effects.

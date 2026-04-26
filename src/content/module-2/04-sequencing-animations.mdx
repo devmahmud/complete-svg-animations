@@ -1,62 +1,117 @@
 # Sequencing Animations
 
-## Staggered Animations
+<Objective>
+- Stagger animations across elements with `animation-delay`
+- Layer multiple animations on one element via comma-separated declarations
+- Use `animation-fill-mode: forwards` to keep the final frame
+</Objective>
 
-Create sequences by delaying animations:
+A sequence is just a set of animations with **different start times** on the same timeline. CSS gives you `animation-delay` for offsets — combined with `:nth-child()` selectors, you can stagger any number of elements without any JavaScript.
 
-```html
-<svg viewBox="0 0 200 100">
-  <circle class="dot" cx="30" cy="50" r="10" fill="red"/>
-  <circle class="dot" cx="70" cy="50" r="10" fill="green"/>
-  <circle class="dot" cx="110" cy="50" r="10" fill="blue"/>
-  <circle class="dot" cx="150" cy="50" r="10" fill="purple"/>
+## The bouncing dots pattern
+
+<LiveSVG code={`<svg viewBox="0 0 200 60">
+  <circle cx="40"  cy="30" r="6" class="dot d1"/>
+  <circle cx="80"  cy="30" r="6" class="dot d2"/>
+  <circle cx="120" cy="30" r="6" class="dot d3"/>
+  <circle cx="160" cy="30" r="6" class="dot d4"/>
 </svg>
-```
+
+<style>
+.dot { fill: #7c5cff; transform-box: fill-box; transform-origin: center; animation: bob 1s ease-in-out infinite; }
+.d1 { animation-delay: 0s;   }
+.d2 { animation-delay: 0.12s; }
+.d3 { animation-delay: 0.24s; }
+.d4 { animation-delay: 0.36s; fill: #ffd43b; }
+@keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-14px); } }
+</style>`} caption="Four dots, one keyframe, staggered 120ms apart. Classic loading indicator." />
 
 ```css
-.dot {
-  animation: bounce 1s ease-in-out infinite;
-}
-
-.dot:nth-child(1) { animation-delay: 0s; }
-.dot:nth-child(2) { animation-delay: 0.1s; }
-.dot:nth-child(3) { animation-delay: 0.2s; }
-.dot:nth-child(4) { animation-delay: 0.3s; }
-
-@keyframes bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-20px); }
-}
+.dot { animation: bob 1s ease-in-out infinite; }
+.d1 { animation-delay: 0s;    }
+.d2 { animation-delay: 0.12s; }
+.d3 { animation-delay: 0.24s; }
+.d4 { animation-delay: 0.36s; }
 ```
 
-## Complex Sequencing
+## Layered loops on one element
 
-```html
-<svg viewBox="0 0 100 100">
-  <g class="loading-spinner">
-    <circle cx="50" cy="50" r="40" fill="none" stroke="#e5e7eb" stroke-width="8"/>
-    <circle class="progress" cx="50" cy="50" r="40" fill="none" stroke="#3b82f6" stroke-width="8" stroke-dasharray="251.2" stroke-dashoffset="251.2"/>
+You can stack animations by **comma-separating** them. Each gets independent timing.
+
+<LiveSVG code={`<svg viewBox="0 0 100 100">
+  <circle cx="50" cy="50" r="20" class="combo"/>
+</svg>
+
+<style>
+.combo {
+  fill: #7c5cff;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation:
+    spin 3s linear infinite,
+    flash 1.5s ease-in-out infinite;
+}
+@keyframes spin  { to { transform: rotate(360deg); } }
+@keyframes flash { 50% { fill: #ffd43b; } }
+</style>`} caption="Spin (3s) and color-flash (1.5s) run on the same element, independent durations." />
+
+## Hand-built sequences with one keyframe
+
+For one-shot intros (logo reveals, modal entrances), express the whole sequence as keyframe stops in a single `@keyframes`:
+
+<LiveSVG code={`<svg viewBox="0 0 200 80">
+  <g class="logo">
+    <rect x="20"  y="30" width="20" height="20" rx="3" fill="#7c5cff"/>
+    <rect x="50"  y="30" width="20" height="20" rx="3" fill="#ffd43b"/>
+    <rect x="80"  y="30" width="20" height="20" rx="3" fill="#3ddc97"/>
+    <rect x="110" y="30" width="20" height="20" rx="3" fill="#ff5d73"/>
   </g>
 </svg>
-```
 
-```css
-.loading-spinner {
-  animation: spin 2s linear infinite;
+<style>
+.logo rect { transform-box: fill-box; transform-origin: center; opacity: 0; }
+.logo rect { animation: appear 0.6s cubic-bezier(.2,.8,.2,1) forwards; }
+.logo rect:nth-child(1) { animation-delay: 0.0s; }
+.logo rect:nth-child(2) { animation-delay: 0.1s; }
+.logo rect:nth-child(3) { animation-delay: 0.2s; }
+.logo rect:nth-child(4) { animation-delay: 0.3s; }
+@keyframes appear {
+  from { opacity: 0; transform: translateY(8px) scale(0.9); }
+  to   { opacity: 1; transform: translateY(0)   scale(1);   }
 }
+</style>`} caption="Each rect appears 100ms after the last — one shared keyframe + per-child delays." />
 
-.progress {
-  animation: progress 2s ease-in-out infinite;
-}
+## Spinning progress ring
 
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
+Two animations on different elements, sharing a clock:
 
-@keyframes progress {
-  0% { stroke-dashoffset: 251.2; }
-  50% { stroke-dashoffset: 0; }
+<LiveSVG code={`<svg viewBox="0 0 100 100" width="120">
+  <g class="ring">
+    <circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="8"/>
+    <circle cx="50" cy="50" r="40" fill="none" stroke="#7c5cff" stroke-width="8"
+            stroke-linecap="round"
+            stroke-dasharray="251.2" stroke-dashoffset="251.2"
+            class="prog"/>
+  </g>
+</svg>
+
+<style>
+.ring { transform-origin: 50px 50px; animation: spin 2s linear infinite; }
+.prog { animation: dash 2s ease-in-out infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes dash {
+  0%   { stroke-dashoffset: 251.2; }
+  50%  { stroke-dashoffset: 0; }
   100% { stroke-dashoffset: -251.2; }
 }
-``` 
+</style>`} height={360} caption="The whole ring spins; the dashoffset cycles fill ↔ empty. Indeterminate progress." />
+
+<Callout type="tip" title="`animation-fill-mode: forwards`">
+  By default an animation snaps back to the starting state when it ends. Use <code>forwards</code> (or its shorthand <code>&hellip; forwards;</code>) to keep the final keyframe — essential for one-shot reveals.
+</Callout>
+
+<Recap takeaways={[
+  "animation-delay + :nth-child = staggered sequences with no JavaScript.",
+  "Comma-separate animations to layer multiple loops on one element.",
+  "animation-fill-mode: forwards keeps the final state after the animation ends."
+]} next={{ to: '/module/module-2?lesson=lesson-2-5', label: 'Timing Functions' }} />

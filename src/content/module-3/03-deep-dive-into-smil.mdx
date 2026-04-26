@@ -1,72 +1,114 @@
 # Deep Dive into SMIL
 
-## The `<animate>` Element
+<Objective>
+- Pick `from`/`to` vs `values` for any animation shape
+- Choose the correct `calcMode` (linear / paced / discrete / spline)
+- Use `keyTimes` to pace keyframes asymmetrically
+- Decide between `fill="freeze"` and `fill="remove"`
+</Objective>
 
-The most versatile SMIL element for animating any SVG attribute:
+`<animate>` is the workhorse — every other SMIL element (`<animateTransform>`, `<animateMotion>`, `<set>`) is a specialized variant of the same idea: pick an attribute, list its values over time, and let the renderer interpolate.
+
+## Anatomy
 
 ```html
-<svg viewBox="0 0 100 100">
-  <rect x="10" y="10" width="80" height="80" fill="red">
-    <animate 
-      attributeName="fill"
-      values="red;blue;green;red"
-      dur="3s"
-      repeatCount="indefinite"
-    />
+<animate
+  attributeName="cx"           <!-- which attribute -->
+  values="50;100;50"           <!-- key values, semicolon-separated -->
+  dur="2s"                     <!-- total duration -->
+  begin="0s"                   <!-- start offset (or event) -->
+  repeatCount="indefinite"     <!-- 1, n, or "indefinite" -->
+  fill="freeze"                <!-- "remove" (default) or "freeze" final -->
+  calcMode="linear"            <!-- linear, paced, discrete, spline -->
+/>
+```
+
+## Animating any attribute
+
+<LiveSVG code={`<svg viewBox="0 0 100 100">
+  <rect x="10" y="10" width="80" height="80">
+    <animate attributeName="fill"
+             values="#7c5cff;#ffd43b;#3ddc97;#7c5cff"
+             dur="3s" repeatCount="indefinite"/>
+    <animate attributeName="rx"
+             values="0;40;0" dur="3s" repeatCount="indefinite"/>
   </rect>
-</svg>
-```
+</svg>`} caption="Two animations on one rect: color cycle + corner radius. Both run in parallel on the same clock." />
 
-## Key Attributes
+## `values` vs `from`/`to`
 
-```html
-<animate 
-  attributeName="cx"           <!-- Attribute to animate -->
-  values="50;100;50"          <!-- Values to animate between -->
-  dur="2s"                    <!-- Duration -->
-  begin="0s"                  <!-- When to start -->
-  repeatCount="indefinite"    <!-- How many times to repeat -->
-  calcMode="linear"           <!-- Interpolation mode -->
-/>
-```
-
-## Animation Modes
+There are two ways to specify keyframes:
 
 ```html
-<!-- Linear interpolation -->
-<animate 
-  attributeName="cx"
-  values="50;100"
-  dur="2s"
-  calcMode="linear"
-/>
+<!-- Two-value form: from start to end -->
+<animate attributeName="r" from="10" to="40" dur="1s"/>
 
-<!-- Discrete steps -->
-<animate 
-  attributeName="fill"
-  values="red;blue;green"
-  dur="3s"
-  calcMode="discrete"
-/>
-
-<!-- Paced (constant speed) -->
-<animate 
-  attributeName="d"
-  values="M10 10 L90 10;M10 10 Q50 50 90 10"
-  dur="2s"
-  calcMode="paced"
-/>
+<!-- Multi-value form: arbitrary keyframes -->
+<animate attributeName="r" values="10;40;15;30;10" dur="2s"/>
 ```
 
-## Advanced Value Control
+Use `from`/`to` for simple A→B. Use `values` for anything more complex — including ping-pong loops (start and end at the same value).
 
-```html
-<animate 
-  attributeName="r"
-  values="10;30;10"           <!-- Simple values -->
-  keyTimes="0;0.5;1"          <!-- Control timing -->
-  keySplines="0.4 0 0.6 1;0.4 0 0.6 1"  <!-- Custom easing -->
-  dur="2s"
-  repeatCount="indefinite"
-/>
-``` 
+## `calcMode`: how SMIL interpolates
+
+| Mode | Behavior |
+| --- | --- |
+| `linear` (default) | Even spacing between values |
+| `paced` | Constant **visual** speed (great for path morphs) |
+| `discrete` | Snap, no interpolation (good for fill cycling) |
+| `spline` | Cubic Bézier easing per segment (next lesson) |
+
+<LiveSVG code={`<svg viewBox="0 0 200 100">
+  <text x="14"  y="14" fill="#b8bfd0" font-size="9">linear</text>
+  <text x="14"  y="50" fill="#b8bfd0" font-size="9">discrete</text>
+  <text x="14"  y="86" fill="#b8bfd0" font-size="9">paced</text>
+
+  <circle cy="20" r="6" fill="#7c5cff">
+    <animate attributeName="cx" values="60;180;60" dur="3s" calcMode="linear" repeatCount="indefinite"/>
+  </circle>
+  <circle cy="56" r="6" fill="#ffd43b">
+    <animate attributeName="cx" values="60;120;180;120;60" dur="3s" calcMode="discrete" repeatCount="indefinite"/>
+  </circle>
+  <circle cy="92" r="6" fill="#3ddc97">
+    <animate attributeName="cx" values="60;90;180;100;60" dur="3s" calcMode="paced" repeatCount="indefinite"/>
+  </circle>
+</svg>`} caption="Three rows, three calcModes. Discrete snaps; paced ignores keyTimes and uses constant geometric speed." />
+
+## `keyTimes`: pacing keyframes manually
+
+`values` divides the duration evenly by default. `keyTimes` overrides that — each entry is a number 0–1 marking when the corresponding `values` entry happens.
+
+<LiveSVG code={`<svg viewBox="0 0 100 100">
+  <circle cx="50" cy="50" r="20" fill="#7c5cff">
+    <!-- spend 80% of the time small, snap big in the last 20% -->
+    <animate attributeName="r"
+             values="20;20;50;20"
+             keyTimes="0; 0.8; 0.9; 1"
+             dur="2s" repeatCount="indefinite"/>
+  </circle>
+</svg>`} caption="Anticipation + payoff: hold small, then quick burst." />
+
+## `repeatCount` and `repeatDur`
+
+- `repeatCount="3"` — play three times.
+- `repeatCount="indefinite"` — loop forever.
+- `repeatDur="6s"` — repeat for a total of 6 seconds (regardless of how many cycles fit).
+
+## `fill="freeze"` vs `fill="remove"`
+
+When the animation ends, what happens to the attribute?
+
+- **`remove`** (default) — snap back to the original value.
+- **`freeze`** — keep the final value.
+
+For one-shot reveals (path drawing, fade-in), always use `fill="freeze"` or the animation will reset on completion.
+
+<Callout type="warn" title="Beware the `fill` collision">
+  The <code>fill</code> attribute means TWO things: paint color (on shapes) and end-state (on animations). They never conflict because they're on different elements, but the dual meaning trips up everyone once.
+</Callout>
+
+<Recap takeaways={[
+  "values gives you keyframes; calcMode controls how SMIL interpolates between them.",
+  "keyTimes (range 0–1) lets you pace keyframes unevenly — anticipate, hold, snap.",
+  "fill='freeze' keeps the final value; default 'remove' snaps back."
+]} next={{ to: '/module/module-3?lesson=lesson-3-4', label: 'SMIL Timing Functions' }} />

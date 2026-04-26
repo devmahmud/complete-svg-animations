@@ -1,99 +1,127 @@
 # SMIL and React
 
-## Using SMIL in React
+<Objective>
+- Drop SMIL into JSX with no library required
+- Toggle animations with React state via `begin="indefinite"`
+- Trigger animations imperatively via refs and `beginElement()`
+- Avoid the "restart on every render" anti-pattern
+</Objective>
 
-SMIL animations work seamlessly in React components:
+SMIL is plain SVG markup, so it works in any React component without a library. The interesting cases are: **starting/stopping animations from state**, **programmatic triggers from refs**, and **avoiding restart-on-render gotchas**.
+
+## Drop-in animation
+
+The simplest case — declarative SVG inside JSX:
 
 ```jsx
-import React from 'react';
-
-const AnimatedSVG = () => {
-  return (
-    <svg viewBox="0 0 100 100" width="200" height="200">
-      <circle cx="50" cy="50" r="20" fill="blue">
-        <animate 
-          attributeName="r"
-          values="20;40;20"
-          dur="2s"
-          repeatCount="indefinite"
-        />
-        <animate 
-          attributeName="fill"
-          values="blue;red;blue"
-          dur="2s"
-          repeatCount="indefinite"
-        />
-      </circle>
-    </svg>
-  );
-};
-
-export default AnimatedSVG;
+const Pulse = () => (
+  <svg viewBox="0 0 100 100" width={200} height={200}>
+    <circle cx="50" cy="50" r="20" fill="#7c5cff">
+      <animate attributeName="r"    values="20;40;20" dur="2s" repeatCount="indefinite" />
+      <animate attributeName="fill" values="#7c5cff;#ffd43b;#7c5cff" dur="2s" repeatCount="indefinite" />
+    </circle>
+  </svg>
+);
 ```
 
-## Dynamic SMIL with React
+That's it. React renders the markup, the browser runs the animation. **No useEffect needed.**
+
+## Toggling via `begin="indefinite"`
+
+You can pause/start animations from React state without touching imperative APIs. SMIL has a special begin value: `"indefinite"` means "never start until told to."
 
 ```jsx
-import React, { useState } from 'react';
-
-const InteractiveSMIL = () => {
-  const [isAnimating, setIsAnimating] = useState(false);
-
+function Toggle() {
+  const [on, setOn] = useState(false);
   return (
-    <div>
-      <button onClick={() => setIsAnimating(!isAnimating)}>
-        {isAnimating ? 'Stop' : 'Start'} Animation
-      </button>
-      
-      <svg viewBox="0 0 100 100" width="200" height="200">
-        <circle cx="50" cy="50" r="20" fill="blue">
-          <animate 
+    <>
+      <button onClick={() => setOn(v => !v)}>{on ? 'Stop' : 'Start'}</button>
+      <svg viewBox="0 0 100 100" width={160} height={160}>
+        <circle cx="50" cy="50" r="20" fill="#7c5cff">
+          <animate
             attributeName="r"
             values="20;40;20"
             dur="1s"
             repeatCount="indefinite"
-            begin={isAnimating ? "0s" : "indefinite"}
+            begin={on ? '0s' : 'indefinite'}
           />
         </circle>
       </svg>
-    </div>
+    </>
   );
-};
-
-export default InteractiveSMIL;
+}
 ```
 
-## SMIL with React Hooks
+When `on` flips, React re-renders with a new `begin` value and the animation starts/stops.
+
+## Programmatic control via refs
+
+Each `<animate>` element has DOM methods: `beginElement()`, `endElement()`, `beginElementAt(seconds)`. Use them when you need to fire an animation imperatively (e.g. on a network event):
 
 ```jsx
-import React, { useEffect, useRef } from 'react';
-
-const SMILWithRefs = () => {
-  const svgRef = useRef(null);
-
-  useEffect(() => {
-    // Access SMIL animations programmatically
-    const animations = svgRef.current.querySelectorAll('animate');
-    
-    animations.forEach(anim => {
-      // Control animations via JavaScript
-      anim.beginElement();
-    });
-  }, []);
-
+function Replay() {
+  const animRef = useRef(null);
   return (
-    <svg ref={svgRef} viewBox="0 0 100 100" width="200" height="200">
-      <circle cx="50" cy="50" r="20" fill="blue">
-        <animate 
-          attributeName="r"
-          values="20;40;20"
-          dur="2s"
-          repeatCount="indefinite"
-        />
-      </circle>
-    </svg>
+    <>
+      <button onClick={() => animRef.current?.beginElement()}>Replay</button>
+      <svg viewBox="0 0 100 100" width={160} height={160}>
+        <circle cx="50" cy="50" r="20" fill="#7c5cff">
+          <animate
+            ref={animRef}
+            attributeName="r"
+            values="20;40;20"
+            dur="1s"
+            fill="freeze"
+            begin="indefinite"
+          />
+        </circle>
+      </svg>
+    </>
   );
-};
+}
+```
 
-export default SMILWithRefs;
-``` 
+`beginElement()` fires the animation on demand — same effect as setting `begin="elementId.click"` declaratively, but driven by your code.
+
+## Avoiding the "restart on every render" trap
+
+Some attributes on `<animate>` use **strings** that React treats as new on every parent render. If parent re-renders churn the SMIL element, animations restart unexpectedly.
+
+Two ways to avoid it:
+
+1. **Memoize the SVG subtree** with `React.memo` if the parent re-renders frequently.
+2. **Use `key`** judiciously — a stable `key` keeps the element identity across renders.
+
+```jsx
+const Pulse = React.memo(() => (
+  <svg ... ><animate .../></svg>
+));
+```
+
+## Mixing CSS hover + SMIL
+
+CSS handles state-changes, SMIL handles continuous motion. They share the same DOM, so both work at once:
+
+```jsx
+<svg className="pulser" viewBox="0 0 100 100">
+  <circle cx="50" cy="50" r="20" fill="#7c5cff">
+    <animate attributeName="r" values="20;30;20" dur="2s" repeatCount="indefinite"/>
+  </circle>
+</svg>
+
+/* CSS */
+.pulser circle { transition: fill 0.3s ease; }
+.pulser:hover circle { fill: #ffd43b; }
+```
+
+The radius pulses via SMIL; the fill swaps via CSS hover. No conflict — they target different attributes.
+
+<Callout type="tip" title="When to bring a real library">
+  For one-off SMIL or simple loops, raw markup is fine. For coordinated UI animations across many components — Framer Motion, GSAP, or React Spring give you React-friendly APIs, gesture support, and physics. Reach for them when SMIL stops fitting the mental model.
+</Callout>
+
+<Recap takeaways={[
+  "SMIL is JSX-friendly — no library, no useEffect, just markup.",
+  "begin={state ? '0s' : 'indefinite'} toggles animations from React state.",
+  "Use beginElement() on a ref for imperative triggers (network events, form submits)."
+]} next={{ to: '/module/module-3?lesson=lesson-3-7', label: 'Advanced SMIL Projects' }} />

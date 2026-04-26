@@ -1,82 +1,108 @@
 # Path Commands
 
-## Command Overview
+<Objective>
+- Use M, L, H, V, Q, C, A, and Z confidently
+- Distinguish absolute (uppercase) from relative (lowercase) commands
+- Author a path from scratch given a target shape
+</Objective>
 
-Path commands are single letters followed by coordinates. Commands can be **absolute** (capital letters) or **relative** (lowercase letters).
+Every path command is **one letter** followed by coordinates. **Capital letters use absolute coordinates**, lowercase use **relative** (delta from the previous point).
 
-## Line Commands
+## The full command set
 
-```html
-<!-- Move to (absolute) -->
-<path d="M 10 10" />
+| Command | Meaning |
+| --- | --- |
+| `M` / `m` | Move to (no line drawn) |
+| `L` / `l` | Line to |
+| `H` / `h` | Horizontal line |
+| `V` / `v` | Vertical line |
+| `Q` / `q` | Quadratic Bézier (1 control point) |
+| `T` / `t` | Smooth quadratic (mirror previous control) |
+| `C` / `c` | Cubic Bézier (2 control points) |
+| `S` / `s` | Smooth cubic (mirror previous control) |
+| `A` / `a` | Elliptical arc |
+| `Z` / `z` | Close path |
 
-<!-- Move to (relative) -->
-<path d="m 10 10" />
+## Lines: M, L, H, V
 
-<!-- Line to (absolute) -->
-<path d="M 10 10 L 90 90" />
+<LiveSVG code={`<svg viewBox="0 0 100 100">
+  <!-- Square via H and V -->
+  <path d="M 20 20 H 80 V 80 H 20 Z" fill="none" stroke="#7c5cff" stroke-width="3"/>
+</svg>`} caption="H and V take only one number — they keep the other coordinate constant." />
 
-<!-- Line to (relative) -->
-<path d="M 10 10 l 80 80" />
+## Absolute vs relative
 
-<!-- Horizontal line -->
-<path d="M 10 10 H 90" />
+The same square, written with relative commands:
 
-<!-- Vertical line -->
-<path d="M 10 10 V 90" />
-```
+<LiveSVG code={`<svg viewBox="0 0 100 100">
+  <path d="M 20 20 h 60 v 60 h -60 z" fill="none" stroke="#ffd43b" stroke-width="3"/>
+</svg>`} caption="Lowercase = delta. Easier to refactor; harder to read at first." />
 
-## Curve Commands
+## Quadratic curves: Q
 
-```html
-<!-- Quadratic Bézier curve -->
-<path d="M 10 50 Q 50 10 90 50" />
+`Q cx cy x y` — one control point, one end point. The curve bends toward the control.
 
-<!-- Cubic Bézier curve -->
-<path d="M 10 50 C 30 10 70 90 90 50" />
+<LiveSVG code={`<svg viewBox="0 0 100 100">
+  <path d="M 10 80 Q 50 0 90 80" fill="none" stroke="#7c5cff" stroke-width="3"/>
+  <!-- Visualize the control -->
+  <line x1="10" y1="80" x2="50" y2="0" stroke="#3ddc97" stroke-dasharray="2 2" stroke-width="1" opacity="0.6"/>
+  <line x1="50" y1="0" x2="90" y2="80" stroke="#3ddc97" stroke-dasharray="2 2" stroke-width="1" opacity="0.6"/>
+  <circle cx="50" cy="0" r="2" fill="#3ddc97"/>
+</svg>`} caption="Green dot is the control point. Move it down and the curve flattens." />
 
-<!-- Smooth quadratic curve -->
-<path d="M 10 50 Q 30 10 50 50 T 90 50" />
+## Cubic curves: C
 
-<!-- Smooth cubic curve -->
-<path d="M 10 50 C 30 10 70 90 90 50 S 110 10 130 50" />
-```
+`C c1x c1y c2x c2y x y` — two control points. Each anchors a tangent.
 
-## Arc Commands
+<LiveSVG code={`<svg viewBox="0 0 100 100">
+  <path d="M 10 80 C 30 10, 70 10, 90 80" fill="none" stroke="#7c5cff" stroke-width="3"/>
+  <line x1="10" y1="80" x2="30" y2="10" stroke="#3ddc97" stroke-dasharray="2 2" stroke-width="1" opacity="0.6"/>
+  <line x1="90" y1="80" x2="70" y2="10" stroke="#3ddc97" stroke-dasharray="2 2" stroke-width="1" opacity="0.6"/>
+  <circle cx="30" cy="10" r="2" fill="#3ddc97"/>
+  <circle cx="70" cy="10" r="2" fill="#3ddc97"/>
+</svg>`} caption="Cubic = more shape control. Drag a control x-coord and feel the curve respond." />
 
-```html
-<!-- Arc -->
-<path d="M 10 50 A 40 40 0 0 1 90 50" />
-```
+## Arcs: A
 
-**Arc Parameters:**
-- `rx, ry`: X and Y radius
-- `x-axis-rotation`: Rotation of the ellipse
-- `large-arc-flag`: 0 for small arc, 1 for large arc
-- `sweep-flag`: 0 for counterclockwise, 1 for clockwise
-- `x, y`: End point
+`A rx ry x-rotation large-arc sweep x y` — the seven scariest numbers in SVG.
 
-## Close Path
+<LiveSVG code={`<svg viewBox="0 0 100 100">
+  <path d="M 20 50 A 30 20 0 0 1 80 50" fill="none" stroke="#ffd43b" stroke-width="3"/>
+</svg>`} caption='rx=30, ry=20, no rotation, small arc, clockwise sweep. Flip the 4th flag to 1 to take the long way around.' />
 
-```html
-<!-- Close the path -->
-<path d="M 10 10 L 90 10 L 90 90 L 10 90 Z" />
-```
+The `large-arc` and `sweep` flags pick which of the four possible arcs you mean — try toggling them between 0 and 1.
 
-## Complex Path Example
+## Close: Z
 
-```html
-<svg viewBox="0 0 200 200">
-  <path 
-    d="M 20 100 
-       Q 50 20 100 100 
-       T 180 100
-       L 180 150
-       Q 100 180 20 150
-       Z"
-    fill="lightblue"
-    stroke="blue"
-    stroke-width="2"
-  />
-</svg>
-``` 
+`Z` (or `z`) draws a straight line back to the most recent `M`. It's how you make filled shapes — without it, fills can produce surprising results.
+
+## A meaningful example
+
+<LiveSVG code={`<svg viewBox="0 0 200 200">
+  <path d="M 20 100
+           Q 50 20 100 100
+           T 180 100
+           L 180 150
+           Q 100 180 20 150
+           Z"
+        fill="rgba(124,92,255,0.18)"
+        stroke="#7c5cff"
+        stroke-width="2"
+        stroke-linejoin="round"/>
+</svg>`} caption="A wave with a curved baseline. Five commands, infinite variations." />
+
+<Callout type="tip" title="Read paths like sentences">
+  Each command is a verb. Coordinates are objects. <code>M 0 0 L 10 10 Z</code> = "move to origin, draw line to (10,10), close." Once that clicks, every SVG file becomes legible.
+</Callout>
+
+<TryIt goal="Draw a smooth wave: start at (10, 50), curve up to (50, 20), then back down to (90, 50).">
+<LiveSVG code={`<svg viewBox="0 0 100 100">
+  <path d="" fill="none" stroke="#7c5cff" stroke-width="3"/>
+</svg>`} caption='Hint: M 10 50  Q 30 0 50 20  Q 70 40 90 50' />
+</TryIt>
+
+<Recap takeaways={[
+  "M moves the pen, L draws a line, Q/C draw curves, A draws arcs, Z closes.",
+  "Capital letters use absolute coordinates; lowercase use deltas.",
+  "Smooth variants T (after Q) and S (after C) auto-mirror the previous control point."
+]} next={{ to: '/module/module-4?lesson=lesson-4-3', label: 'Drawing Animations' }} />

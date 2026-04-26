@@ -1,68 +1,96 @@
 # CSS Transforms
 
-## Transform Properties
+<Objective>
+- Use translate / scale / rotate / skew on SVG elements
+- Set `transform-box: fill-box` so origins behave intuitively
+- Layer transforms across nested groups for compound motion
+</Objective>
 
-CSS transforms allow you to move, scale, rotate, and skew SVG elements:
+`transform` is the GPU-accelerated way to move things. The browser composites transformed elements on a separate layer — that's why a CSS `transform` is almost always cheaper than animating `x`, `y`, `cx`, `cy`, etc.
+
+## The four base operations
+
+<LiveSVG code={`<svg viewBox="0 0 320 100">
+  <rect x="10"  y="30" width="40" height="40" fill="#7c5cff" class="t"/>
+  <rect x="90"  y="30" width="40" height="40" fill="#ffd43b" class="s"/>
+  <rect x="170" y="30" width="40" height="40" fill="#3ddc97" class="r"/>
+  <rect x="250" y="30" width="40" height="40" fill="#ff5d73" class="k"/>
+</svg>
+
+<style>
+.t, .s, .r, .k { transform-origin: center; transform-box: fill-box; }
+.t { animation: tx 2s ease-in-out infinite alternate; }
+.s { animation: sc 2s ease-in-out infinite alternate; }
+.r { animation: ro 3s linear infinite; }
+.k { animation: sk 2s ease-in-out infinite alternate; }
+@keyframes tx { to { transform: translateX(20px); } }
+@keyframes sc { to { transform: scale(1.4); } }
+@keyframes ro { to { transform: rotate(360deg); } }
+@keyframes sk { to { transform: skewX(20deg); } }
+</style>`} caption="Translate, scale, rotate, skew — the four primitive transforms." />
 
 ```css
-.svg-element {
-  /* Move */
-  transform: translateX(20px) translateY(-10px);
-  
-  /* Scale */
-  transform: scale(1.2);
-  transform: scaleX(1.5) scaleY(0.8);
-  
-  /* Rotate */
-  transform: rotate(45deg);
-  
-  /* Skew */
-  transform: skewX(10deg) skewY(5deg);
-  
-  /* Combine transforms */
-  transform: translateX(20px) rotate(45deg) scale(1.2);
-}
+transform: translateX(20px);          /* move */
+transform: scale(1.4);                /* uniform scale */
+transform: scaleX(1.5) scaleY(0.8);   /* non-uniform */
+transform: rotate(45deg);             /* spin */
+transform: skewX(20deg);              /* shear */
+
+/* Combine — order matters! Read right-to-left. */
+transform: translateX(20px) rotate(45deg) scale(1.4);
 ```
 
-## Transform Origin
+<Callout type="warn" title="`transform-box: fill-box` is usually what you want">
+  By default SVG transforms are relative to the SVG's coordinate system, not the element's bounding box. Set <code>transform-box: fill-box</code> in CSS so <code>transform-origin: center</code> means "center of the shape," not "center of the SVG."
+</Callout>
 
-Control the point around which transforms occur:
+## Transform-origin: the pivot point
 
-```css
-.svg-element {
-  /* Default: center of element */
-  transform-origin: center;
-  
-  /* Top-left corner */
-  transform-origin: 0 0;
-  
-  /* Bottom-right corner */
-  transform-origin: 100% 100%;
-  
-  /* Custom point */
-  transform-origin: 25% 75%;
-}
-```
+The same `rotate(45deg)` looks completely different depending on where the pivot is.
 
-## Advanced Transform Example
+<LiveSVG code={`<svg viewBox="0 0 320 100">
+  <rect x="20"  y="30" width="40" height="40" fill="#7c5cff" class="o-center"/>
+  <rect x="100" y="30" width="40" height="40" fill="#ffd43b" class="o-tl"/>
+  <rect x="180" y="30" width="40" height="40" fill="#3ddc97" class="o-br"/>
+  <rect x="260" y="30" width="40" height="40" fill="#ff5d73" class="o-corner"/>
+</svg>
 
-```html
-<svg viewBox="0 0 100 100">
-  <g class="rotating-group">
-    <rect x="20" y="20" width="60" height="60" fill="blue"/>
-    <circle cx="50" cy="50" r="10" fill="white"/>
+<style>
+[class^="o-"] { transform-box: fill-box; animation: spin 3s linear infinite; }
+.o-center { transform-origin: center; }
+.o-tl     { transform-origin: top left; }
+.o-br     { transform-origin: bottom right; }
+.o-corner { transform-origin: 100% 0%; }
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>`} caption="Same rotation, four different origins: center, top-left, bottom-right, top-right." />
+
+## Combining: one transform per element
+
+You can only set **one** `transform` declaration on an element. To animate translate AND scale independently, either combine them in one keyframe or wrap the element in a `<g>` and transform each layer separately:
+
+<LiveSVG code={`<svg viewBox="0 0 100 100">
+  <g class="orbit">
+    <g class="bob">
+      <circle cx="0" cy="0" r="6" fill="#7c5cff"/>
+    </g>
   </g>
 </svg>
-```
 
-```css
-.rotating-group {
-  animation: rotate 2s linear infinite;
-  transform-origin: 50% 50%;
-}
+<style>
+.orbit { transform-origin: 50px 50px; animation: spin 3s linear infinite; }
+.bob   { transform: translate(50px, 20px); animation: bob 1s ease-in-out infinite alternate; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes bob  { to { transform: translate(50px, 26px); } }
+</style>`} caption="Outer group orbits, inner group bobs — separable concerns." />
 
-@keyframes rotate {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-``` 
+## Why transforms beat attribute animation
+
+Animating `cx`, `cy`, or `x` triggers SVG layout on every frame. Transforms run on the compositor and don't touch layout at all. For 60fps motion on slow devices, **always prefer transforms**.
+
+The exception: when you need to change geometry (radius, path data) — there CSS can't help, and you'll need SMIL (Module 3).
+
+<Recap takeaways={[
+  "Transform > attribute animation — GPU-friendly and smoother.",
+  "Set transform-box: fill-box so transform-origin: center means 'center of the shape'.",
+  "One transform per element. Wrap children in <g> for compound motion."
+]} next={{ to: '/module/module-2?lesson=lesson-2-4', label: 'Sequencing Animations' }} />
