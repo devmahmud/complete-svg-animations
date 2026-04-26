@@ -1,47 +1,78 @@
 # Coordinate System
 
+<Objective>
+- Read SVG coordinates correctly (origin at top-left, y grows down)
+- Understand `viewBox` as a virtual camera that pans and zooms
+- Make any SVG responsive at any rendered size
+</Objective>
+
 ## Understanding Coordinates
 
 SVGs use a **coordinate system** where:
+
 - Origin (0,0) is at the **top-left corner**
 - X-axis increases **rightward**
-- Y-axis increases **downward**
-- Units are **user units** (scalable)
+- Y-axis increases **downward** (the opposite of math class)
+- Units are **user units**, not pixels — they're scaled by the viewBox
 
-## ViewBox - The SVG Camera
+<LiveSVG code={`<svg viewBox="0 0 100 100">
+  <!-- 0,0 reference dot -->
+  <circle cx="0" cy="0" r="2" fill="#ff5d73"/>
+  <text x="4" y="9" font-size="6" fill="#ff5d73">0,0</text>
 
-The `viewBox` attribute acts like a camera, determining which part of the infinite SVG canvas is visible:
+  <!-- A point at 70,70 -->
+  <circle cx="70" cy="70" r="2" fill="#ffd43b"/>
+  <text x="73" y="74" font-size="6" fill="#ffd43b">70,70</text>
+
+  <!-- Axis arrows -->
+  <line x1="0" y1="0" x2="40" y2="0" stroke="#7c5cff" stroke-width="0.5"/>
+  <line x1="0" y1="0" x2="0" y2="40" stroke="#7c5cff" stroke-width="0.5"/>
+</svg>`} caption="Move the 70,70 dot. Notice y grows downward." />
+
+## ViewBox — the SVG camera
+
+The `viewBox` attribute defines the **window** the renderer uses to look at the canvas. Anything outside the window is clipped.
 
 ```html
 <svg viewBox="0 0 100 100">
-  <!-- Shows a 100x100 area starting at (0,0) -->
+  <!-- Shows a 100×100 area starting at (0,0) -->
 </svg>
 
 <svg viewBox="50 50 100 100">
-  <!-- Shows a 100x100 area starting at (50,50) -->
+  <!-- Shows a 100×100 area starting at (50,50) -->
 </svg>
 ```
 
-**ViewBox Syntax:**
-```html
-<svg viewBox="x y width height">
-```
+**Syntax:** `viewBox="x y width height"` — the first two values pan the camera, the second two zoom it.
 
-- `x`: X-coordinate of top-left visible region
-- `y`: Y-coordinate of top-left visible region  
-- `width`: Width of visible region
-- `height`: Height of visible region
+<LiveSVG code={`<svg viewBox="0 0 100 100">
+  <rect x="0" y="0" width="100" height="100" fill="rgba(124,92,255,0.08)"/>
+  <rect x="30" y="30" width="40" height="40" fill="#7c5cff"/>
+</svg>`} caption='Try changing viewBox to "30 30 40 40" — the inner square fills the frame.' />
 
 ## Responsive SVGs
 
-ViewBox makes SVGs responsive - they scale to any size while maintaining proportions:
+ViewBox makes SVGs scale to any rendered size while preserving proportions:
 
 ```html
-<svg viewBox="0 0 24 24" width="16" height="16">
-  <!-- 16px icon -->
-</svg>
+<svg viewBox="0 0 24 24" width="16" height="16">…</svg>
+<svg viewBox="0 0 24 24" width="128" height="128">…</svg>
+```
 
-<svg viewBox="0 0 24 24" width="128" height="128">
-  <!-- 128px icon - same proportions -->
-</svg>
-``` 
+Same source, different sizes — pixel-perfect at any scale.
+
+<TryIt goal="Crop the SVG so only the right half of the violet square is visible.">
+<LiveSVG code={`<svg viewBox="0 0 100 100">
+  <rect x="20" y="20" width="60" height="60" fill="#7c5cff"/>
+</svg>`} caption="Hint: change the viewBox x parameter so the camera shifts right." />
+</TryIt>
+
+<Callout type="tip" title="ViewBox is your design canvas">
+  Pick a viewBox once (24×24 for icons, 100×100 for examples, 800×600 for illustrations) and place every shape in those units. The browser handles the pixel math.
+</Callout>
+
+<Recap takeaways={[
+  "(0,0) is top-left; x grows right; y grows DOWN.",
+  "viewBox = camera. The first two numbers pan; the last two zoom.",
+  "Units are virtual ('user units') — choose a viewBox once and design in it."
+]} next={{ to: '/module/module-1?lesson=lesson-1-5', label: 'Styling Attributes' }} />

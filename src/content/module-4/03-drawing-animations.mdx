@@ -1,122 +1,83 @@
 # Drawing Animations
 
-## Stroke Dasharray Technique
+<Objective>
+- Animate `stroke-dashoffset` to make a path appear to draw itself
+- Use `pathLength="100"` so the dash math becomes percentages
+- Sequence multiple draws via `begin` offsets
+</Objective>
 
-Drawing animations use `stroke-dasharray` and `stroke-dashoffset` to create the illusion of drawing:
+## The stroke-dasharray trick
 
-```html
-<svg viewBox="0 0 100 100">
-  <path 
-    d="M 10 50 Q 50 10 90 50"
-    fill="none"
-    stroke="blue"
-    stroke-width="3"
-    stroke-linecap="round"
-    stroke-dasharray="100"
-    stroke-dashoffset="100"
-  >
-    <animate 
-      attributeName="stroke-dashoffset"
-      values="100;0"
-      dur="2s"
-      fill="freeze"
-    />
+A path's stroke can be rendered as a series of dashes via `stroke-dasharray`. Combined with `stroke-dashoffset` (which shifts where dashes start), animating the offset to zero makes a path appear to **draw itself**.
+
+<LiveSVG code={`<svg viewBox="0 0 100 100">
+  <path d="M 10 50 Q 50 10 90 50"
+        fill="none" stroke="#7c5cff" stroke-width="3"
+        stroke-linecap="round"
+        stroke-dasharray="100" stroke-dashoffset="100">
+    <animate attributeName="stroke-dashoffset"
+             values="100;0" dur="2s" fill="freeze"/>
   </path>
-</svg>
-```
+</svg>`} caption="Refresh by clicking Reset to replay the draw." />
 
-## Calculating Path Length
+## pathLength normalizes the math
 
-```html
-<svg viewBox="0 0 100 100">
-  <path 
-    d="M 10 50 Q 50 10 90 50"
-    fill="none"
-    stroke="blue"
-    stroke-width="3"
-    stroke-linecap="round"
-    stroke-dasharray="100"
-    stroke-dashoffset="100"
-    pathLength="100"
-  >
-    <animate 
-      attributeName="stroke-dashoffset"
-      values="100;0"
-      dur="2s"
-      fill="freeze"
-    />
+Real path length is a transcendental computation — annoying to figure out by hand. `pathLength="100"` declares "treat this path as if it were 100 units long," letting you use clean dasharray/offset numbers regardless of actual geometry.
+
+<LiveSVG code={`<svg viewBox="0 0 100 100">
+  <path d="M 10 50 Q 50 10 90 50"
+        fill="none" stroke="#ffd43b" stroke-width="3"
+        stroke-linecap="round"
+        pathLength="100"
+        stroke-dasharray="100" stroke-dashoffset="100">
+    <animate attributeName="stroke-dashoffset"
+             values="100;0" dur="2s" fill="freeze"/>
   </path>
-</svg>
-```
+</svg>`} caption="Same animation, but the numbers are honest 0–100 percentages." />
 
-## Multiple Drawing Sequences
+## Sequencing multiple draws
 
-```html
-<svg viewBox="0 0 200 100">
-  <!-- First line -->
-  <path 
-    d="M 20 50 L 80 50"
-    fill="none"
-    stroke="red"
-    stroke-width="3"
-    stroke-linecap="round"
-    stroke-dasharray="60"
-    stroke-dashoffset="60"
-  >
-    <animate 
-      attributeName="stroke-dashoffset"
-      values="60;0"
-      dur="1s"
-      begin="0s"
-      fill="freeze"
-    />
+Use the `begin` attribute (with `s` for seconds) to chain strokes:
+
+<LiveSVG code={`<svg viewBox="0 0 200 100">
+  <path d="M 20 50 L 80 50" fill="none" stroke="#ff5d73" stroke-width="3" stroke-linecap="round"
+        pathLength="100" stroke-dasharray="100" stroke-dashoffset="100">
+    <animate attributeName="stroke-dashoffset" values="100;0" dur="1s" begin="0s" fill="freeze"/>
   </path>
-  
-  <!-- Second line -->
-  <path 
-    d="M 120 50 L 180 50"
-    fill="none"
-    stroke="blue"
-    stroke-width="3"
-    stroke-linecap="round"
-    stroke-dasharray="60"
-    stroke-dashoffset="60"
-  >
-    <animate 
-      attributeName="stroke-dashoffset"
-      values="60;0"
-      dur="1s"
-      begin="1s"
-      fill="freeze"
-    />
+  <path d="M 120 50 L 180 50" fill="none" stroke="#7c5cff" stroke-width="3" stroke-linecap="round"
+        pathLength="100" stroke-dasharray="100" stroke-dashoffset="100">
+    <animate attributeName="stroke-dashoffset" values="100;0" dur="1s" begin="1s" fill="freeze"/>
   </path>
-</svg>
-```
+</svg>`} height={320} caption="Second stroke begins exactly when the first finishes." />
 
-## Complex Drawing Animation
+## A continuous loop draw
 
-```html
-<svg viewBox="0 0 100 100">
-  <path 
-    d="M 20 80 
-       Q 20 20 50 20 
-       Q 80 20 80 50 
-       Q 80 80 50 80 
-       Q 20 80 20 50"
-    fill="none"
-    stroke="purple"
-    stroke-width="3"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-    stroke-dasharray="300"
-    stroke-dashoffset="300"
-  >
-    <animate 
-      attributeName="stroke-dashoffset"
-      values="300;0"
-      dur="3s"
-      fill="freeze"
-    />
+<LiveSVG code={`<svg viewBox="0 0 100 100">
+  <path d="M 20 80 Q 20 20 50 20 Q 80 20 80 50 Q 80 80 50 80 Q 20 80 20 50"
+        fill="none" stroke="#3ddc97" stroke-width="3"
+        stroke-linecap="round" stroke-linejoin="round"
+        pathLength="100"
+        stroke-dasharray="100" stroke-dashoffset="100">
+    <animate attributeName="stroke-dashoffset"
+             values="100;0;-100" dur="3s" repeatCount="indefinite"/>
   </path>
-</svg>
-``` 
+</svg>`} caption="Going from 100 → 0 → -100 draws then erases — perfect for loops." />
+
+<Callout type="tip" title="Why stroke-linecap matters">
+  `stroke-linecap="round"` rounds the leading edge of the dash so the line head doesn't look chopped during the animation.
+</Callout>
+
+<TryIt goal="Make this circle draw itself once, then freeze. Use pathLength=100 and animate stroke-dashoffset from 100 to 0.">
+<LiveSVG code={`<svg viewBox="0 0 100 100">
+  <circle cx="50" cy="50" r="36" fill="none" stroke="#ffd43b" stroke-width="3"
+          pathLength="100" stroke-dasharray="100" stroke-dashoffset="100">
+    <!-- Add an animate element -->
+  </circle>
+</svg>`} />
+</TryIt>
+
+<Recap takeaways={[
+  "stroke-dashoffset animation creates the 'drawing itself' effect.",
+  "pathLength='100' normalizes any path's length to 100 units — no math.",
+  "begin='Ns' chains drawings in sequence."
+]} next={{ to: '/module/module-4?lesson=lesson-4-4', label: 'Motion Along Paths' }} />

@@ -1,22 +1,72 @@
 # Grouping Elements
 
-## The Group Element (`<g>`)
+<Objective>
+- Use `<g>` to share attributes across many shapes
+- Transform a whole subtree with a single attribute
+- Animate groups efficiently — one transform, many children
+</Objective>
 
-Use the `<g>` element to group related shapes and apply styles to multiple elements:
+The `<g>` element is SVG's container — it has no shape of its own, but it does three powerful things at once: **shares attributes with its children**, **transforms them together**, and **organizes the document tree**.
 
-```html
-<svg viewBox="0 0 100 100">
-  <g fill="red" stroke="black" stroke-width="2">
+## Sharing attributes
+
+Children inherit any paint attribute set on the group. This DRY-s up complex graphics:
+
+<LiveSVG code={`<svg viewBox="0 0 100 100">
+  <g fill="#7c5cff" stroke="#ffd43b" stroke-width="2">
     <circle cx="30" cy="30" r="10"/>
     <circle cx="70" cy="30" r="10"/>
     <circle cx="50" cy="70" r="10"/>
   </g>
+</svg>`} caption="Each child can still override — try fill='#3ddc97' on the third circle." />
+
+## Transforming together
+
+A `transform` on a `<g>` applies once and moves the whole subtree. This is much cheaper than recalculating each child's coordinates by hand.
+
+<LiveSVG code={`<svg viewBox="0 0 100 100">
+  <g transform="translate(20, 0) rotate(15 50 50)">
+    <rect x="35" y="25" width="30" height="50" fill="#7c5cff"/>
+    <circle cx="50" cy="20" r="6" fill="#ffd43b"/>
+  </g>
+</svg>`} caption='`rotate(15 50 50)` rotates 15° around the (50, 50) pivot.' />
+
+Transforms compose inside the group — `transform="translate(20,0) rotate(15)"` does the rotation first (in local space), then translates. Read them right-to-left.
+
+## Animating a group
+
+<LiveSVG code={`<svg viewBox="0 0 100 100">
+  <g transform-origin="50 50" class="orbit">
+    <circle cx="50" cy="20" r="4" fill="#7c5cff"/>
+    <circle cx="50" cy="80" r="4" fill="#ffd43b"/>
+  </g>
 </svg>
-```
 
-## Benefits of Grouping
+<style>
+.orbit {
+  animation: spin 4s linear infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+</style>`} caption="Animate the group, the children come along for the ride." />
 
-1. **Apply styles to multiple elements at once**
-2. **Transform multiple elements together**
-3. **Organize complex SVGs**
-4. **Reuse common elements** 
+<Callout type="tip" title="Use groups for naming">
+  A well-organized SVG is a tree of named groups: <code>&lt;g id="navbar"&gt;</code>, <code>&lt;g class="leaves"&gt;</code>. Future-you (or a designer handing you SVG from Figma) will thank you.
+</Callout>
+
+<TryIt goal="Make all three circles use the same fill via a single attribute on a parent group, then rotate the whole group 30°.">
+<LiveSVG code={`<svg viewBox="0 0 100 100">
+  <g>
+    <circle cx="30" cy="50" r="10"/>
+    <circle cx="50" cy="50" r="10"/>
+    <circle cx="70" cy="50" r="10"/>
+  </g>
+</svg>`} caption='Add fill="#ffd43b" and transform="rotate(30 50 50)" to the <g>.' />
+</TryIt>
+
+<Recap takeaways={[
+  "<g> has no visual presence — it's purely structural.",
+  "Attributes set on a group apply to every child unless the child overrides.",
+  "Animate the group, not the children — one transform updates the whole subtree."
+]} next={{ to: '/module/module-1?lesson=lesson-1-7', label: 'Practice Exercises' }} />

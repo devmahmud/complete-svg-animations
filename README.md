@@ -5,6 +5,8 @@
 [![Course Status](https://img.shields.io/badge/status-complete-brightgreen)](https://github.com/your-username/complete-svg-animations)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
+![Complete SVG Animations screenshot](docs/screenshot.png)
+
 ---
 
 ## 🎯 Course Overview

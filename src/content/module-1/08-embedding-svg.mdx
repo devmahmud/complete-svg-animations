@@ -1,0 +1,106 @@
+# Embedding SVG in the Wild
+
+<Objective>
+- Pick the right embedding technique for your situation
+- Know which methods support animation, theming, and interactivity
+- Avoid the most common pitfall: embedding via `<img>` and wondering why animations don't run
+</Objective>
+
+There are **four ways** to put an SVG on a page, and they each behave differently. The most consequential difference: only some of them allow animations, scripting, and CSS theming.
+
+## The four methods
+
+| Method | Markup | Animations | currentColor | JS | When to use |
+| --- | --- | --- | --- | --- | --- |
+| Inline SVG | `<svg>…</svg>` directly in HTML | ✅ | ✅ | ✅ | Animations, icons that re-color with CSS |
+| `<img src="…">` | `<img src="icon.svg">` | ❌ | ❌ | ❌ | Static logos, content imagery |
+| `<object data="…">` | `<object data="logo.svg">` | ✅ | ✅ | ✅ | Standalone widget, isolated DOM |
+| CSS `background` | `background: url('…')` | ❌ | ❌ | ❌ | Decorative backgrounds, sprites |
+
+The TL;DR: **inline SVG is the only way to get full control**. Animations baked into a `.svg` file won't run inside an `<img>`.
+
+## Inline: the powerful one
+
+Drop the SVG markup right into your HTML or JSX:
+
+<LiveSVG code={`<!-- This is exactly how inline SVG looks in your page -->
+<svg viewBox="0 0 24 24" width="48" height="48" class="logo">
+  <circle cx="12" cy="12" r="10" fill="#7c5cff"/>
+  <path d="M 7 12 L 11 16 L 17 8" fill="none" stroke="#fff" stroke-width="2.5"
+        stroke-linecap="round" stroke-linejoin="round"
+        stroke-dasharray="20" stroke-dashoffset="20">
+    <animate attributeName="stroke-dashoffset" from="20" to="0" dur="0.5s" begin="0.2s" fill="freeze"/>
+  </path>
+</svg>`} caption="Inline SVG can run SMIL animations, inherit currentColor, and respond to CSS hover. The other methods can't." />
+
+## `<img>` — convenient but inert
+
+```html
+<img src="logo.svg" alt="Acme logo" width="120" height="40"/>
+```
+
+**Pros:** caching, lazy-loading, simple markup, separate files.
+**Cons:** no SMIL, no CSS theming, no JS access, no `currentColor`, no `:hover` on internals.
+
+Use `<img>` when the SVG is essentially a static image and you want browser caching.
+
+## `<object>` — animations preserved, isolated
+
+```html
+<object data="loader.svg" type="image/svg+xml" aria-label="Loading"></object>
+```
+
+**Pros:** keeps SMIL alive, scripts inside the SVG run, `currentColor` works (the SVG has its own document), separate file caching.
+**Cons:** the SVG lives in a sub-document — the parent page can't easily style its internals via CSS.
+
+Use `<object>` when you have an animated SVG file (e.g. an exported After Effects animation, an animated logo), and you don't need to style its insides from the parent stylesheet.
+
+## CSS `background` — pure decoration
+
+```css
+.hero {
+  background-image: url('pattern.svg');
+}
+```
+
+Renders as a flat image. No animation, no interactivity. Use only for decorative backgrounds, sprite atlases, or as a fallback.
+
+## Decision tree
+
+- **Need animation, hover, or `currentColor`?** → inline SVG.
+- **Animated file, but don't need parent CSS access?** → `<object>`.
+- **Static logo or content image?** → `<img>`.
+- **Decorative background?** → CSS `url(…)`.
+
+<Callout type="warn" title="The number-one mistake">
+  Exporting an animated SVG from After Effects / Lottie / Figma and then embedding it as <code>&lt;img&gt;</code>. The animation silently doesn't run. Always use inline or <code>&lt;object&gt;</code> for animated assets.
+</Callout>
+
+## React specifics
+
+In React you typically inline SVG directly:
+
+```jsx
+function Logo() {
+  return (
+    <svg viewBox="0 0 100 100" className="logo">
+      <circle cx="50" cy="50" r="40" fill="currentColor"/>
+    </svg>
+  );
+}
+```
+
+Or import a `.svg` file as a React component (with bundlers like Vite or webpack via SVGR):
+
+```jsx
+import { ReactComponent as Logo } from './logo.svg';
+// <Logo className="logo"/>
+```
+
+The `ReactComponent` import inlines the SVG markup — animations preserved, props forwarded.
+
+<Recap takeaways={[
+  "Inline SVG = full power. The other three methods sacrifice features for convenience.",
+  "<img> and CSS background = no animation. <object> and inline = animation works.",
+  "currentColor only works in inline and <object> — the foundation of icon systems."
+]} next={{ to: '/module/module-2', label: 'Module 2: Your First Animation' }} />

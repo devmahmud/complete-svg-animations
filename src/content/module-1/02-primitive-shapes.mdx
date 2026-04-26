@@ -1,126 +1,84 @@
 # The Seven Primitive Shapes
 
-SVG has only **seven primitive shapes** that form the foundation of all SVG graphics:
+<Objective>
+- Identify the seven primitive shapes and what each is good at
+- Pick the right primitive for a given drawing task
+- Read each shape's attributes well enough to modify them on sight
+</Objective>
+
+SVG has **seven primitive shapes** that form the foundation of every graphic. Each lives inside an `<svg>` viewBox and is positioned in user units.
 
 ## 1. Rectangle (`<rect>`)
-```html
-<svg viewBox="0 0 100 100">
-  <rect 
-    x="20" 
-    y="20" 
-    width="60" 
-    height="60" 
-    fill="crimson"
-  />
-</svg>
-```
 
-**Attributes:**
-- `x`, `y`: Position (top-left corner)
-- `width`, `height`: Dimensions
-- `fill`: Fill color
-- `stroke`: Border color
-- `stroke-width`: Border thickness
-- `rx`, `ry`: Corner radius for rounded rectangles
+<LiveSVG code={`<svg viewBox="0 0 100 100">
+  <rect x="20" y="20" width="60" height="60" rx="8" fill="#7c5cff"/>
+</svg>`} />
+
+**Attributes:** `x`, `y` (top-left), `width`, `height`, `fill`, `stroke`, `stroke-width`, `rx`/`ry` for rounded corners.
 
 ## 2. Circle (`<circle>`)
-```html
-<svg viewBox="0 0 100 100">
-  <circle 
-    cx="50" 
-    cy="50" 
-    r="30" 
-    fill="darkorchid"
-    stroke="currentColor"
-    stroke-width="3"
-  />
-</svg>
-```
 
-**Attributes:**
-- `cx`, `cy`: Center coordinates
-- `r`: Radius
-- `fill`, `stroke`, `stroke-width`
+<LiveSVG code={`<svg viewBox="0 0 100 100">
+  <circle cx="50" cy="50" r="30" fill="#ffd43b" stroke="#7c5cff" stroke-width="3"/>
+</svg>`} />
+
+**Attributes:** `cx`, `cy` (center), `r` (radius).
 
 ## 3. Ellipse (`<ellipse>`)
-```html
-<svg viewBox="0 0 100 100">
-  <ellipse 
-    cx="50" 
-    cy="50" 
-    rx="40" 
-    ry="20" 
-    fill="none"
-    stroke="yellow"
-    stroke-width="3"
-  />
-</svg>
-```
 
-**Attributes:**
-- `cx`, `cy`: Center coordinates
-- `rx`, `ry`: Horizontal and vertical radii
+<LiveSVG code={`<svg viewBox="0 0 100 100">
+  <ellipse cx="50" cy="50" rx="40" ry="20" fill="none" stroke="#3ddc97" stroke-width="3"/>
+</svg>`} />
+
+**Attributes:** `cx`, `cy`, `rx` (horizontal radius), `ry` (vertical radius).
 
 ## 4. Line (`<line>`)
-```html
-<svg viewBox="0 0 100 100">
-  <line 
-    x1="20" 
-    y1="20" 
-    x2="80" 
-    y2="80" 
-    stroke="currentColor"
-    stroke-width="3"
-  />
-</svg>
-```
 
-**Attributes:**
-- `x1`, `y1`: Start point
-- `x2`, `y2`: End point
-- `stroke`, `stroke-width`
+<LiveSVG code={`<svg viewBox="0 0 100 100">
+  <line x1="20" y1="20" x2="80" y2="80" stroke="#ede9de" stroke-width="3" stroke-linecap="round"/>
+</svg>`} />
+
+**Attributes:** `x1`, `y1`, `x2`, `y2`. A line has no fill — only `stroke`.
 
 ## 5. Polyline (`<polyline>`)
-```html
-<svg viewBox="0 0 100 100">
-  <polyline 
-    points="20,20 40,40 60,20 80,40" 
-    fill="none"
-    stroke="currentColor"
-    stroke-width="3"
-  />
-</svg>
-```
 
-**Attributes:**
-- `points`: Space-separated coordinate pairs
+<LiveSVG code={`<svg viewBox="0 0 100 100">
+  <polyline points="20,80 40,40 60,60 80,20" fill="none" stroke="#7c5cff" stroke-width="3" stroke-linejoin="round"/>
+</svg>`} />
+
+**Attributes:** `points` is a list of `x,y` pairs. Polyline does **not** auto-close.
 
 ## 6. Polygon (`<polygon>`)
-```html
-<svg viewBox="0 0 100 100">
-  <polygon 
-    points="50,20 20,80 80,80" 
-    fill="none"
-    stroke="yellow"
-    stroke-width="3"
-  />
-</svg>
-```
 
-**Attributes:**
-- `points`: Space-separated coordinate pairs (automatically closes)
+<LiveSVG code={`<svg viewBox="0 0 100 100">
+  <polygon points="50,15 90,80 10,80" fill="rgba(124,92,255,0.15)" stroke="#7c5cff" stroke-width="3" stroke-linejoin="round"/>
+</svg>`} />
+
+Same as polyline, but the last point auto-connects to the first.
 
 ## 7. Path (`<path>`)
-```html
-<svg viewBox="0 0 100 100">
-  <path 
-    d="M 20 20 L 80 20 L 80 80 L 20 80 Z" 
-    fill="none"
-    stroke="currentColor"
-    stroke-width="3"
-  />
-</svg>
-```
 
-**Attributes:**
-- `d`: Path data (commands and coordinates) 
+The most powerful primitive — every other shape can be expressed as a path.
+
+<LiveSVG code={`<svg viewBox="0 0 100 100">
+  <path d="M 20 20 L 80 20 L 80 80 L 20 80 Z" fill="none" stroke="#ffd43b" stroke-width="3"/>
+</svg>`} caption="Try replacing 'L 80 20' with 'Q 50 -10 80 20' to curve the top edge." />
+
+**Attribute:** `d` is the path's _command_ string (`M` move, `L` line, `Q` quadratic, `C` cubic, `Z` close…). We'll cover paths in depth in Module 4.
+
+<TryIt goal="Build a stop sign: a yellow octagon with a thick violet outline.">
+<LiveSVG code={`<svg viewBox="0 0 100 100">
+  <!-- A polygon needs 8 points for an octagon -->
+  <polygon points="" fill="" stroke="" stroke-width=""/>
+</svg>`} caption="Hint: an octagon's vertices live on a circle of radius ~38, evenly spaced 45° apart. Approximate to integers." />
+</TryIt>
+
+<Callout type="tip" title="Mental model">
+  Once you internalize that **every shape is a path**, attribute names start to make sense — they're just shorthand for path data.
+</Callout>
+
+<Recap takeaways={[
+  "Seven primitives: rect, circle, ellipse, line, polyline, polygon, path.",
+  "rect, circle, ellipse have positional attributes; polyline/polygon use points; path uses d.",
+  "All seven are rendered the same way: trace a path, then fill and/or stroke."
+]} next={{ to: '/module/module-1?lesson=lesson-1-3', label: 'How Shapes Are Made' }} />

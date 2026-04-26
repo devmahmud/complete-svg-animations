@@ -1,29 +1,65 @@
 # The Problem with CSS
 
-## CSS Limitations
+<Objective>
+- Identify the SVG attributes CSS cannot animate
+- Decide between CSS and SMIL for any given task
+- Understand why both systems exist and when to mix them
+</Objective>
 
-While CSS animations are powerful, they have significant limitations when it comes to SVG:
+CSS gives you `transition` and `@keyframes`, plus the GPU-friendly `transform` and `opacity`. That's enough for **most** UI. But SVG has attributes CSS can't reach — and that's where SMIL earns its place.
 
-1. **Cannot animate path data** (`d` attribute)
-2. **Cannot animate complex attributes** like `points`, `viewBox`
-3. **Limited morphing capabilities**
-4. **No built-in path following**
-5. **Cannot animate between different shape types**
+## What CSS can animate on SVG
 
-## What CSS Can't Do
+- `fill`, `stroke`, `stroke-width`, `stroke-opacity`
+- `opacity`
+- `transform` (translate, scale, rotate, skew)
+- `r`, `cx`, `cy`, `x`, `y`, `width`, `height` (modern browsers — but layout-bound)
+- `stroke-dasharray`, `stroke-dashoffset`
 
-```html
-<!-- This won't work with CSS -->
-<path d="M 10 10 L 90 10 L 90 90 L 10 90 Z">
-  <!-- CSS cannot animate the 'd' attribute -->
-</path>
+## What CSS cannot animate
 
-<!-- This won't work with CSS -->
-<polygon points="10,10 90,10 90,90 10,90">
-  <!-- CSS cannot animate the 'points' attribute -->
-</polygon>
-```
+- **`d`** — the path data string (the heart of every shape)
+- **`points`** — polyline / polygon point lists
+- **`viewBox`** — the SVG camera
+- **Gradient stops** (`offset`, `stop-color`, `stop-opacity`)
+- **Anything along a path** — there's no CSS equivalent of `<animateMotion>`
 
-## The Solution: SMIL
+## What you give up
 
-SMIL (Synchronized Multimedia Integration Language) is SVG's native animation system that can animate **any** SVG attribute. 
+<LiveSVG code={`<svg viewBox="0 0 100 100">
+  <!-- Try animating the 'd' attribute with CSS — it won't work. SMIL just does. -->
+  <path fill="#7c5cff">
+    <animate attributeName="d"
+             values="M 20 50 Q 50 20 80 50 Q 50 80 20 50 Z;
+                     M 20 50 Q 50 80 80 50 Q 50 20 20 50 Z;
+                     M 20 50 Q 50 20 80 50 Q 50 80 20 50 Z"
+             dur="2s" repeatCount="indefinite"/>
+  </path>
+</svg>`} caption="A blob morph — impossible in pure CSS, trivial in SMIL." />
+
+## When to pick which system
+
+| Need | CSS | SMIL |
+| --- | --- | --- |
+| Hover / focus state changes | ✅ best | ⚠️ awkward |
+| Looping ambient motion | ✅ | ✅ |
+| Animating `transform` / `opacity` | ✅ best (GPU) | ✅ |
+| Animating `d`, `points`, `viewBox` | ❌ no | ✅ only option |
+| Following an arbitrary path | ❌ partial via `offset-path` | ✅ best |
+| Synchronizing multiple animations on events | ⚠️ JS-glue | ✅ built-in |
+| Internet Explorer support | ✅ | ❌ |
+| GPU layer, 60fps with hundreds of elements | ✅ | ⚠️ depends |
+
+<Callout type="tip" title="Reach for SMIL when CSS hits a wall">
+  In production code, mix freely: CSS for state changes and ambient layouts, SMIL for the things only SMIL can do. There's no penalty for combining.
+</Callout>
+
+## What SMIL is
+
+**SMIL** = Synchronized Multimedia Integration Language. In SVG you'll only ever use four elements: `<animate>`, `<animateTransform>`, `<animateMotion>`, and `<set>`. Each one lives **inside** the shape it animates. The next lesson introduces them.
+
+<Recap takeaways={[
+  "CSS animates fill, stroke, opacity, and transform — not d, points, or gradient stops.",
+  "SMIL animates ANY SVG attribute, plus motion-along-paths.",
+  "In production: CSS for hover/state, SMIL for the things only it can do, mix freely."
+]} next={{ to: '/module/module-3?lesson=lesson-3-2', label: 'Introduction to SMIL' }} />

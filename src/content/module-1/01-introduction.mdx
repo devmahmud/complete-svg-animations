@@ -1,5 +1,11 @@
 # Introduction to SVGs
 
+<Objective>
+- Understand what SVG is and why it's the format of choice for icons, illustrations, and animations
+- Recognize the difference between the **box model** (HTML) and the **path model** (SVG)
+- Read and write a minimal SVG document with one shape
+</Objective>
+
 SVG (Scalable Vector Graphics) is a markup language for images, similar to how HTML is a markup language for documents. All SVGs begin with a root `<svg>` element:
 
 ```html
@@ -8,17 +14,41 @@ SVG (Scalable Vector Graphics) is a markup language for images, similar to how H
 </svg>
 ```
 
-**Key Concepts:**
+<LiveSVG code={`<svg viewBox="0 0 100 100">
+  <circle cx="50" cy="50" r="32" fill="#7c5cff"/>
+</svg>`} caption="Edit the radius or fill — it re-renders live." />
+
+**Key concepts:**
+
 - SVGs are made up of **elements** (shapes)
 - Each element represents a **primitive shape**
 - Shapes are controlled through **attributes**
 - SVGs are **vector-based** and scale infinitely
-- SVGs follow the **path model** - everything is constructed from paths
+- SVGs follow the **path model** — everything is constructed from paths
 
 ## The Path Model
 
 Unlike HTML/CSS which uses the **box model**, SVGs use the **path model**:
+
 - All SVG shapes are constructed from a path
 - Shapes begin with an outline (path)
 - The outline is then colored in or made thicker
-- This creates the final visible shape 
+- This creates the final visible shape
+
+<TryIt goal="Make the circle yellow with a violet 4px outline.">
+<LiveSVG code={`<svg viewBox="0 0 100 100">
+  <circle cx="50" cy="50" r="32" fill="#7c5cff"/>
+</svg>`} caption="Change fill, then add stroke and stroke-width attributes." />
+</TryIt>
+
+The two paint properties — `fill` (interior) and `stroke` (outline) — are the heart of every SVG you'll write. Module 1 lesson 5 covers them in depth.
+
+<Callout type="tip" title="Try it">
+  Change `fill` to `none` and add `stroke="#ffd43b" stroke-width="3"` in the editor above. The circle becomes an outline — same path, different paint.
+</Callout>
+
+<Recap takeaways={[
+  "SVG is a markup language for vector images, written declaratively like HTML.",
+  "Every shape is a path. fill colors the interior; stroke draws the outline.",
+  "viewBox defines the coordinate space; width/height control rendered size."
+]} next={{ to: '/module/module-1?lesson=lesson-1-2', label: 'The Seven Primitive Shapes' }} />

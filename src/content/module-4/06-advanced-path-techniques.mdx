@@ -1,95 +1,100 @@
 # Advanced Path Techniques
 
-## Path Clipping
+<Objective>
+- Use `<clipPath>` to mask SVG content with arbitrary shapes
+- Combine animated paths with `<mask>` for reveal effects
+- Apply gradients and filters via `<defs>` references
+</Objective>
 
-```html
-<svg viewBox="0 0 100 100">
+These techniques combine paths with `<defs>`, `<clipPath>`, `<mask>`, and gradients — they're how production-grade SVG illustrations are built.
+
+## Clipping with a path
+
+A `<clipPath>` defines a shape that **constrains visibility**. Anything outside the clip is invisible.
+
+<LiveSVG code={`<svg viewBox="0 0 100 100">
   <defs>
-    <clipPath id="circleClip">
+    <clipPath id="dot">
       <circle cx="50" cy="50" r="40"/>
     </clipPath>
   </defs>
-  
-  <rect 
-    x="0" 
-    y="0" 
-    width="100" 
-    height="100" 
-    fill="url(#gradient)"
-    clip-path="url(#circleClip)"
-  >
-    <animate 
-      attributeName="x"
-      values="0;-100"
-      dur="3s"
-      repeatCount="indefinite"
-    />
+  <!-- A wide gradient strip clipped to a circle -->
+  <rect x="-100" y="0" width="300" height="100"
+        fill="url(#stripeGrad)" clip-path="url(#dot)">
+    <animate attributeName="x" values="-100;0" dur="3s" repeatCount="indefinite"/>
   </rect>
-</svg>
-```
-
-## Path Masks
-
-```html
-<svg viewBox="0 0 100 100">
   <defs>
-    <mask id="pathMask">
-      <rect width="100" height="100" fill="white"/>
-      <path 
-        d="M 20 50 L 80 50"
-        stroke="black"
-        stroke-width="20"
-        fill="none"
-      >
-        <animate 
-          attributeName="stroke-dasharray"
-          values="0,100;100,0"
-          dur="2s"
-          repeatCount="indefinite"
-        />
+    <linearGradient id="stripeGrad" x1="0%" x2="100%">
+      <stop offset="0%" stop-color="#7c5cff"/>
+      <stop offset="50%" stop-color="#ffd43b"/>
+      <stop offset="100%" stop-color="#3ddc97"/>
+    </linearGradient>
+  </defs>
+</svg>`} caption="The rect slides; only the circular hole is visible. The clip itself is a path." />
+
+## Masks: paint with the alpha channel
+
+A `<mask>` is like a clip, but it uses **luminance** — white means "show," black means "hide," gray means partial transparency. Combine masks with stroke animation for reveal effects:
+
+<LiveSVG code={`<svg viewBox="0 0 100 100">
+  <defs>
+    <mask id="reveal">
+      <rect width="100" height="100" fill="black"/>
+      <path d="M 10 50 L 90 50" stroke="white" stroke-width="30"
+            stroke-linecap="round" stroke-dasharray="100" stroke-dashoffset="100">
+        <animate attributeName="stroke-dashoffset" values="100;0;-100"
+                 dur="3s" repeatCount="indefinite"/>
       </path>
     </mask>
   </defs>
-  
-  <rect 
-    x="0" 
-    y="0" 
-    width="100" 
-    height="100" 
-    fill="blue"
-    mask="url(#pathMask)"
-  />
-</svg>
-```
+  <rect width="100" height="100" fill="#7c5cff" mask="url(#reveal)"/>
+</svg>`} caption="The mask's path strokes left-to-right, revealing the violet rect." />
 
-## Path Gradients
+## Gradients along a path
 
-```html
-<svg viewBox="0 0 100 100">
+Gradients are defined as fills/strokes; you reference them by id. The gradient's coordinate system follows the bounding box of the shape it fills.
+
+<LiveSVG code={`<svg viewBox="0 0 100 100">
   <defs>
-    <linearGradient id="pathGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="red"/>
-      <stop offset="50%" stop-color="yellow"/>
-      <stop offset="100%" stop-color="blue"/>
+    <linearGradient id="ribbon" x1="0%" x2="100%">
+      <stop offset="0%" stop-color="#7c5cff"/>
+      <stop offset="50%" stop-color="#ffd43b"/>
+      <stop offset="100%" stop-color="#3ddc97"/>
     </linearGradient>
   </defs>
-  
-  <path 
-    d="M 10 20 Q 50 10 90 20 Q 50 30 10 20"
-    fill="url(#pathGradient)"
-    stroke="black"
-    stroke-width="2"
-  >
-    <animate 
-      attributeName="d"
-      values="
-        M 10 20 Q 50 10 90 20 Q 50 30 10 20;
-        M 10 80 Q 50 90 90 80 Q 50 70 10 80;
-        M 10 20 Q 50 10 90 20 Q 50 30 10 20
-      "
-      dur="3s"
-      repeatCount="indefinite"
-    />
+  <path d="M 10 20 Q 50 10 90 20 Q 50 30 10 20"
+        fill="url(#ribbon)" stroke="white" stroke-width="0.5">
+    <animate attributeName="d"
+             values="M 10 20 Q 50 10 90 20 Q 50 30 10 20;
+                     M 10 80 Q 50 70 90 80 Q 50 90 10 80;
+                     M 10 20 Q 50 10 90 20 Q 50 30 10 20"
+             dur="3s" repeatCount="indefinite"/>
   </path>
-</svg>
-``` 
+</svg>`} caption="Morphing path + linearGradient fill = a moving rainbow ribbon." />
+
+## Filters: glow with `<filter>`
+
+<LiveSVG code={`<svg viewBox="0 0 100 100">
+  <defs>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="2"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <circle cx="50" cy="50" r="20" fill="#ffd43b" filter="url(#glow)">
+    <animate attributeName="r" values="18;26;18" dur="2s" repeatCount="indefinite"/>
+  </circle>
+</svg>`} caption="A blurred copy is merged behind the original, giving a glow halo." />
+
+<Callout type="tip" title="Define once, reuse everywhere">
+  <code>&lt;defs&gt;</code> holds reusable bits (gradients, filters, paths). Reference by <code>url(#id)</code> as many times as you want — the renderer caches them.
+</Callout>
+
+<Recap takeaways={[
+  "<clipPath> trims visibility to a shape. <mask> uses luminance for soft edges.",
+  "Gradients and filters live in <defs>; reference them via url(#id).",
+  "Animated <mask> + path = reveal effects you can't do any other way."
+]} next={{ to: '/module/module-4?lesson=lesson-4-7', label: 'Real-World Projects' }} />

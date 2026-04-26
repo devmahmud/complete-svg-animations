@@ -1,32 +1,78 @@
 # The Path Element
 
-## Understanding Paths
+<Objective>
+- Read a path's `d` attribute and identify the M / L / Q / C / Z commands
+- Recognize that every other SVG shape is a special case of `<path>`
+- Use the basic stroke + fill knobs to make a path visible
+</Objective>
 
-The `<path>` element is the most powerful and versatile SVG element. It can create any shape by defining a series of drawing commands.
+`<path>` is the most powerful primitive in SVG. Every other shape (rect, circle, polyline…) is a convenience for a specific path. Once you can read path data, you can read any SVG.
 
-## Basic Path Structure
+## Anatomy of a path
 
-```html
-<svg viewBox="0 0 100 100">
-  <path 
-    d="M 10 10 L 90 10 L 90 90 L 10 90 Z"
-    fill="blue"
-    stroke="black"
-    stroke-width="2"
-  />
-</svg>
-```
+A path's **`d`** attribute is a string of single-letter commands followed by their coordinates:
 
-## Path Attributes
+<LiveSVG code={`<svg viewBox="0 0 100 100">
+  <path d="M 10 10 L 90 10 L 90 90 L 10 90 Z"
+        fill="rgba(124,92,255,0.15)"
+        stroke="#7c5cff"
+        stroke-width="3"
+        stroke-linejoin="round"/>
+</svg>`} caption='M = move, L = line, Z = close. Try changing the second L to "L 90 50" — top-right corner moves to mid-right.' />
 
-```html
-<path 
-  d="..."                    <!-- Path data (commands and coordinates) -->
-  fill="blue"               <!-- Fill color -->
-  stroke="black"            <!-- Stroke color -->
-  stroke-width="2"          <!-- Stroke thickness -->
-  stroke-linecap="round"    <!-- Line endings -->
-  stroke-linejoin="round"   <!-- Corner joins -->
-  stroke-dasharray="5,5"    <!-- Dashed pattern -->
-/>
-``` 
+Reading the `d` string left-to-right:
+
+1. `M 10 10` — pick up the pen and **move** to (10, 10)
+2. `L 90 10` — **line to** (90, 10)
+3. `L 90 90` — line to (90, 90)
+4. `L 10 90` — line to (10, 90)
+5. `Z` — **close** the path back to the start
+
+## Curves: the real superpower
+
+Lines are easy. Curves are why paths exist. The most common curve commands are `Q` (quadratic, one control point) and `C` (cubic, two control points):
+
+<LiveSVG code={`<svg viewBox="0 0 200 100">
+  <!-- Quadratic: M start, Q control end -->
+  <path d="M 20 80 Q 50 0 80 80" fill="none" stroke="#7c5cff" stroke-width="3"/>
+  <!-- Cubic: M start, C ctrl1 ctrl2 end -->
+  <path d="M 120 80 C 130 0, 170 0, 180 80" fill="none" stroke="#ffd43b" stroke-width="3"/>
+</svg>`} caption="Left: quadratic. Right: cubic. The control points pull the curve toward themselves." />
+
+## Why every shape is secretly a path
+
+Take a circle. Internally the renderer converts it to a path that traces an arc:
+
+<LiveSVG code={`<svg viewBox="0 0 200 100">
+  <circle cx="50" cy="50" r="30" fill="#7c5cff"/>
+  <path d="M 150 50 a 30 30 0 1 0 60 0 a 30 30 0 1 0 -60 0"
+        fill="#ffd43b" transform="translate(-30 0)"/>
+</svg>`} caption="Identical render, two different elements. The right one uses path arcs (a command)." />
+
+## Path attributes recap
+
+| Attribute | Effect |
+| --- | --- |
+| `d` | The path data string |
+| `fill` | Interior color (default `black`!) |
+| `stroke` / `stroke-width` | Outline |
+| `stroke-linecap` / `stroke-linejoin` | Endpoint and corner styles |
+| `stroke-dasharray` | Dashed pattern |
+| `pathLength` | Declare a virtual length for animation math |
+
+<Callout type="tip" title="Default fill is black">
+  A path with no <code>fill</code> attribute renders solid black, which catches everyone once. Use <code>fill="none"</code> when you only want a stroke.
+</Callout>
+
+<TryIt goal="Convert this rectangle to a path. Same shape, expressed via the d attribute.">
+<LiveSVG code={`<svg viewBox="0 0 100 100">
+  <!-- Replace the rect with a path that draws the same square -->
+  <rect x="20" y="20" width="60" height="60" fill="#7c5cff"/>
+</svg>`} caption="Hint: M 20 20  L 80 20  L 80 80  L 20 80  Z" />
+</TryIt>
+
+<Recap takeaways={[
+  "Every shape is a path. <path> is the most powerful primitive.",
+  "Commands are letters; coordinates are numbers. Capital = absolute, lowercase = relative.",
+  "Default fill is black — set fill='none' for outline-only paths."
+]} next={{ to: '/module/module-4?lesson=lesson-4-2', label: 'Path Commands' }} />

@@ -1,1 +1,100 @@
- 
+# Real-World Projects
+
+<Objective>
+- Combine drawing, motion, and morphing in production patterns
+- Pick the right SVG animation technique from a decision matrix
+- Reproduce four common UI patterns from scratch
+</Objective>
+
+You've covered every SVG animation technique in isolation. The skill now is **composition** — picking the right tool for the job and stacking techniques. Below are four production patterns you can drop into any app.
+
+## 1. Animated checkmark (success state)
+
+<LiveSVG code={`<svg viewBox="0 0 64 64" width="80">
+  <circle cx="32" cy="32" r="28" fill="none" stroke="#3ddc97" stroke-width="3"
+          stroke-dasharray="176" stroke-dashoffset="176">
+    <animate attributeName="stroke-dashoffset" values="176;0" dur="0.5s" fill="freeze"/>
+  </circle>
+  <path d="M 18 33 L 28 43 L 46 24" fill="none" stroke="#3ddc97" stroke-width="3"
+        stroke-linecap="round" stroke-linejoin="round"
+        stroke-dasharray="50" stroke-dashoffset="50">
+    <animate attributeName="stroke-dashoffset" values="50;0" dur="0.4s" begin="0.4s" fill="freeze"/>
+  </path>
+</svg>`} height={360} caption="Two stroke-dashoffset animations chained: ring first, check after." />
+
+## 2. Loading spinner (with personality)
+
+<LiveSVG code={`<svg viewBox="0 0 50 50" width="80">
+  <circle cx="25" cy="25" r="20" fill="none" stroke="#7c5cff" stroke-width="4"
+          stroke-linecap="round" stroke-dasharray="60 100">
+    <animateTransform attributeName="transform" type="rotate"
+                      from="0 25 25" to="360 25 25"
+                      dur="1.2s" repeatCount="indefinite"/>
+    <animate attributeName="stroke-dasharray"
+             values="20 100; 80 100; 20 100"
+             dur="1.6s" repeatCount="indefinite"/>
+  </circle>
+</svg>`} height={360} caption="Rotation + dasharray morph = a spinner that breathes." />
+
+## 3. Animated logo entrance
+
+<LiveSVG code={`<svg viewBox="0 0 200 80" width="280">
+  <defs>
+    <linearGradient id="logo-grad" x1="0" x2="200">
+      <stop offset="0" stop-color="#7c5cff"/>
+      <stop offset="1" stop-color="#ffd43b"/>
+    </linearGradient>
+  </defs>
+
+  <!-- The mark draws first -->
+  <path d="M 20 60 C 40 0, 80 0, 100 60 S 160 100, 180 40"
+        fill="none" stroke="url(#logo-grad)" stroke-width="3" stroke-linecap="round"
+        pathLength="100" stroke-dasharray="100" stroke-dashoffset="100">
+    <animate attributeName="stroke-dashoffset" values="100;0" dur="1.4s" fill="freeze"/>
+  </path>
+
+  <!-- A traveler dot stops at the end -->
+  <circle r="4" fill="#ffd43b" opacity="0">
+    <animate attributeName="opacity" values="0;1" dur="0.2s" begin="1.3s" fill="freeze"/>
+    <animateMotion dur="1.4s" fill="freeze"
+                   path="M 20 60 C 40 0, 80 0, 100 60 S 160 100, 180 40"/>
+  </circle>
+</svg>`} height={380} caption="Stroke-draw + animateMotion combined → a logo reveal." />
+
+## 4. Interactive ripple
+
+<LiveSVG code={`<svg viewBox="0 0 100 100" width="160">
+  <circle cx="50" cy="50" r="18" fill="#7c5cff"/>
+  <!-- Three expanding rings -->
+  <g fill="none" stroke="#7c5cff" stroke-width="2">
+    <circle cx="50" cy="50" r="18">
+      <animate attributeName="r"       values="18;46" dur="1.6s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.6;0" dur="1.6s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="50" cy="50" r="18">
+      <animate attributeName="r"       values="18;46" dur="1.6s" begin="0.5s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.6;0" dur="1.6s" begin="0.5s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="50" cy="50" r="18">
+      <animate attributeName="r"       values="18;46" dur="1.6s" begin="1s"   repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="0.6;0" dur="1.6s" begin="1s"   repeatCount="indefinite"/>
+    </circle>
+  </g>
+</svg>`} height={380} caption="Three offset rings simulate continuous ripples." />
+
+## How to choose
+
+| Need | Reach for |
+| --- | --- |
+| One-off entrance / state change | CSS keyframes |
+| Drawing an outline | `stroke-dashoffset` animation |
+| Following an arbitrary curve | `<animateMotion>` |
+| Morphing one shape into another | `<animate attributeName="d">` |
+| Reactive to user input (hover, click) | CSS or JS event handlers |
+| Production scale, complex sequencing | A library (Anime.js, GSAP, Framer Motion) |
+
+<Callout type="tip" title="Performance reminder">
+  Animate <code>transform</code> and <code>opacity</code> when you can — the browser keeps these on the GPU. Animating <code>x</code>, <code>y</code>, or <code>r</code> forces a layout recalc. SMIL is fine for ambient decoration; for hot paths (60+ animated elements), profile and consider WebGL.
+</Callout>
+
+You've finished the course. Open the [playground](/playground) and build something.

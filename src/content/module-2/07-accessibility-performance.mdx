@@ -1,0 +1,128 @@
+# Accessibility & Performance
+
+<Objective>
+- Honor `prefers-reduced-motion` so motion-sensitive users aren't harmed
+- Add the right ARIA attributes to make animated SVGs accessible
+- Distinguish properties that animate cheaply (composite) from expensive ones (layout)
+- Profile and budget animations for 60 fps
+</Objective>
+
+Beautiful animations that hurt users or grind to 12 fps aren't beautiful. Two production concerns this lesson covers.
+
+## prefers-reduced-motion
+
+A meaningful percentage of users (vestibular disorders, migraines, attention sensitivity) set their OS to "reduce motion." Browsers expose that preference through a media query. **Honor it.**
+
+```css
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+```
+
+This near-disables every animation. For animations that are *content* (a play-pause button morph), provide a static state instead:
+
+```css
+.icon-morph { animation: morph 1s ease forwards; }
+
+@media (prefers-reduced-motion: reduce) {
+  .icon-morph { animation: none; }
+}
+```
+
+In React, `useReducedMotion` from Framer Motion reads the same preference and disables the library's animations automatically.
+
+<Callout type="warn" title="Already enabled in this site">
+  Open this course's CSS — there's a global <code>prefers-reduced-motion</code> rule at the bottom that snaps every animation to zero duration. Test it: System Settings → Accessibility → Reduce Motion.
+</Callout>
+
+## ARIA: making animation perceivable
+
+Animations communicate. Screen readers need that communication too.
+
+**Decorative SVG?** Hide it from assistive tech:
+
+```html
+<svg aria-hidden="true" focusable="false">…</svg>
+```
+
+**Meaningful SVG (icon as the only content)?** Give it a label:
+
+```html
+<button aria-label="Play">
+  <svg aria-hidden="true">…play triangle…</svg>
+</button>
+```
+
+**Standalone illustration?** Use `<title>` and `<desc>`:
+
+```html
+<svg role="img" aria-labelledby="title desc">
+  <title id="title">Sales by quarter</title>
+  <desc id="desc">Revenue grew 23% from Q1 to Q4 of 2024.</desc>
+  …chart…
+</svg>
+```
+
+**Status updates?** When an animation signals state ("loading…", "saved!"), pair it with an `aria-live` region:
+
+```html
+<div aria-live="polite">
+  <svg class="spinner" aria-hidden="true">…</svg>
+  <span class="visually-hidden">Loading</span>
+</div>
+```
+
+## Performance: composite vs layout
+
+The browser renders in stages: **layout → paint → composite**. Each stage costs more than the next. Animations that only touch *composite* (the GPU layer) hit 60 fps almost for free.
+
+| Property | Stage |
+| --- | --- |
+| `transform` | composite — cheap |
+| `opacity` | composite — cheap |
+| `fill`, `stroke` | paint — moderate |
+| `r`, `cx`, `cy`, `x`, `y`, `width`, `height` | layout — expensive |
+| `d`, `points` | layout — expensive |
+
+**Rule of thumb:** if you can express motion as `transform: translate/scale/rotate`, use that instead of animating positional attributes. The browser will compose on the GPU.
+
+## When you must animate `d` or geometry
+
+Path morphing, stroke drawing, motion-along-paths — these all touch layout, but they're CSS-impossible alternatives. The trick: keep the animated element count small. **Animate one or two paths**, not 200.
+
+## will-change: the off-button
+
+`will-change` hints to the browser that an element is about to animate, so it can promote the element to its own GPU layer ahead of time:
+
+```css
+.spinner { will-change: transform; }
+```
+
+Use sparingly — promoting too many layers hurts memory.
+
+## A 60-fps budget
+
+The browser has ~16ms per frame. Anything more = jank. Quick heuristics:
+
+- 1–10 elements animating `transform` or `opacity`: easy 60 fps.
+- 1 path animating `d` with 4–6 keyframes: 60 fps in modern browsers.
+- 50+ elements animating positional attributes: profile first.
+- 200+ animations of any kind: consider Canvas / WebGL.
+
+Open DevTools → Performance, hit Record, and check the FPS chart — if you see red bars, you're over budget.
+
+<Callout type="tip" title="Test on mobile">
+  Desktop CPUs hide a lot of inefficiency. Throttle to 4× CPU and Slow 3G in DevTools, or open the page on a 3-year-old Android. If it feels good there, it'll feel great everywhere.
+</Callout>
+
+<Recap takeaways={[
+  "Always honor prefers-reduced-motion — accessibility, not optional.",
+  "ARIA label or hide every animated SVG. The default (do nothing) is wrong.",
+  "transform and opacity are GPU-cheap; r/cx/d trigger layout. Prefer the cheap ones."
+]} next={{ to: '/module/module-3', label: 'Module 3: Animating the Unanimatable' }} />

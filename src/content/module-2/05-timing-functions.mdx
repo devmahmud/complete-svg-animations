@@ -1,86 +1,99 @@
 # Timing Functions
 
-## Understanding Easing
+<Objective>
+- Pick the right easing keyword for the kind of motion you want
+- Author custom curves with `cubic-bezier`
+- Use `steps()` for discrete, ticking motion
+</Objective>
 
-Timing functions control how animations accelerate and decelerate:
+A timing function describes how an animation's progress maps from "0% done" to "100% done" — linear, eased, bouncy, elastic. The same duration with different easing **looks** completely different, even though the start and end states are identical.
 
-```css
-.element {
-  /* Linear - constant speed */
-  transition: transform 1s linear;
-  
-  /* Ease - slow start, fast middle, slow end */
-  transition: transform 1s ease;
-  
-  /* Ease-in - slow start, fast end */
-  transition: transform 1s ease-in;
-  
-  /* Ease-out - fast start, slow end */
-  transition: transform 1s ease-out;
-  
-  /* Ease-in-out - slow start and end, fast middle */
-  transition: transform 1s ease-in-out;
-  
-  /* Cubic bezier - custom curve */
-  transition: transform 1s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+## The five built-in keywords
+
+<LiveSVG code={`<svg viewBox="0 0 320 200">
+  <g class="row"><circle cx="20" cy="20"  r="10" fill="#7c5cff" class="b linear"/></g>
+  <g class="row"><circle cx="20" cy="60"  r="10" fill="#7c5cff" class="b ease"/></g>
+  <g class="row"><circle cx="20" cy="100" r="10" fill="#7c5cff" class="b ease-in"/></g>
+  <g class="row"><circle cx="20" cy="140" r="10" fill="#7c5cff" class="b ease-out"/></g>
+  <g class="row"><circle cx="20" cy="180" r="10" fill="#7c5cff" class="b ease-in-out"/></g>
+
+  <text x="40" y="24"  fill="#b8bfd0" font-size="11">linear</text>
+  <text x="40" y="64"  fill="#b8bfd0" font-size="11">ease</text>
+  <text x="40" y="104" fill="#b8bfd0" font-size="11">ease-in</text>
+  <text x="40" y="144" fill="#b8bfd0" font-size="11">ease-out</text>
+  <text x="40" y="184" fill="#b8bfd0" font-size="11">ease-in-out</text>
+</svg>
+
+<style>
+.b { animation: slide 2.4s infinite; }
+.linear      { animation-timing-function: linear; }
+.ease        { animation-timing-function: ease; }
+.ease-in     { animation-timing-function: ease-in; }
+.ease-out    { animation-timing-function: ease-out; }
+.ease-in-out { animation-timing-function: ease-in-out; }
+@keyframes slide { 0% { transform: translateX(0); } 50% { transform: translateX(280px); } 100% { transform: translateX(0); } }
+</style>`} caption="Five dots, same duration, five different feels." />
+
+| Keyword | Curve | When to use |
+| --- | --- | --- |
+| `linear` | constant speed | mechanical motion (gauges, timers) |
+| `ease` | slight ease-in/out (default) | most things |
+| `ease-in` | slow start, abrupt end | exits, things leaving the screen |
+| `ease-out` | abrupt start, slow end | entries, things arriving |
+| `ease-in-out` | symmetric ease | back-and-forth loops |
+
+## Custom curves with `cubic-bezier`
+
+`cubic-bezier(x1, y1, x2, y2)` defines a Bézier curve from (0,0) to (1,1). The two control points (x1, y1) and (x2, y2) shape the speed.
+
+<LiveSVG code={`<svg viewBox="0 0 320 200">
+  <g class="row"><circle cx="20" cy="40"  r="10" fill="#ffd43b" class="b smooth"/></g>
+  <g class="row"><circle cx="20" cy="100" r="10" fill="#7c5cff" class="b bounce"/></g>
+  <g class="row"><circle cx="20" cy="160" r="10" fill="#3ddc97" class="b elastic"/></g>
+
+  <text x="40" y="44"  fill="#b8bfd0" font-size="11">smooth (0.25, 0.46, 0.45, 0.94)</text>
+  <text x="40" y="104" fill="#b8bfd0" font-size="11">bounce (0.68, -0.55, 0.265, 1.55)</text>
+  <text x="40" y="164" fill="#b8bfd0" font-size="11">elastic (0.175, 0.885, 0.32, 1.275)</text>
+</svg>
+
+<style>
+.b { animation: slide 2.4s infinite; }
+.smooth  { animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+.bounce  { animation-timing-function: cubic-bezier(0.68, -0.55, 0.265, 1.55); }
+.elastic { animation-timing-function: cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+@keyframes slide { 0% { transform: translateX(0); } 50% { transform: translateX(280px); } 100% { transform: translateX(0); } }
+</style>`} caption="Negative or >1 control values overshoot — that's where bounce and elastic come from." />
+
+<Callout type="tip" title="Visual editor">
+  Don't memorize Bézier numbers. Use <a href="https://cubic-bezier.com">cubic-bezier.com</a> or DevTools' inline curve editor to draw the feel you want.
+</Callout>
+
+## Steps: discrete jumps
+
+`steps(n)` divides the timeline into `n` equal jumps — perfect for sprite animation, typewriter effects, or "ticking" indicators.
+
+<LiveSVG code={`<svg viewBox="0 0 100 100">
+  <line x1="50" y1="50" x2="50" y2="20" stroke="#ffd43b" stroke-width="3" stroke-linecap="round" class="hand"/>
+  <circle cx="50" cy="50" r="3" fill="#ffd43b"/>
+</svg>
+
+<style>
+.hand {
+  transform-origin: 50px 50px;
+  animation: tick 12s steps(12) infinite;
 }
-```
+@keyframes tick { to { transform: rotate(360deg); } }
+</style>`} caption="Clock hand ticks 12 discrete times per loop." />
 
-## Custom Cubic Bezier
+## Picking the right function
 
-```css
-/* Bounce effect */
-transition: transform 1s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+- **Match the metaphor.** Real objects have inertia → use eased curves. Mechanical things → linear.
+- **Direction matters.** Things entering decelerate (`ease-out`); things leaving accelerate (`ease-in`).
+- **Duration matters.** Easing is more visible at longer durations. For 100ms hover effects, linear vs ease is barely perceptible.
+- **Overshoot adds personality.** A subtle bounce on a button click signals "I noticed you" without being annoying.
 
-/* Elastic effect */
-transition: transform 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-
-/* Smooth acceleration */
-transition: transform 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-```
-
-## Timing Function Examples
-
-```html
-<div class="demo-container">
-  <div class="demo-item linear">Linear</div>
-  <div class="demo-item ease">Ease</div>
-  <div class="demo-item ease-in">Ease-in</div>
-  <div class="demo-item ease-out">Ease-out</div>
-  <div class="demo-item ease-in-out">Ease-in-out</div>
-  <div class="demo-item bounce">Bounce</div>
-</div>
-```
-
-```css
-.demo-container {
-  display: flex;
-  gap: 20px;
-  padding: 20px;
-}
-
-.demo-item {
-  width: 60px;
-  height: 60px;
-  background: #3b82f6;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 12px;
-  cursor: pointer;
-  transition: transform 1s;
-}
-
-.demo-item:hover {
-  transform: translateX(100px);
-}
-
-.linear { transition-timing-function: linear; }
-.ease { transition-timing-function: ease; }
-.ease-in { transition-timing-function: ease-in; }
-.ease-out { transition-timing-function: ease-out; }
-.ease-in-out { transition-timing-function: ease-in-out; }
-.bounce { transition-timing-function: cubic-bezier(0.68, -0.55, 0.265, 1.55); }
-``` 
+<Recap takeaways={[
+  "Easing makes the difference between mechanical and alive motion.",
+  "Things entering decelerate (ease-out); things leaving accelerate (ease-in).",
+  "cubic-bezier values >1 or <0 produce overshoot — the source of bounce and elastic."
+]} next={{ to: '/module/module-2?lesson=lesson-2-6', label: 'Practice Projects' }} />

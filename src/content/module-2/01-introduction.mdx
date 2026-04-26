@@ -1,15 +1,59 @@
 # Introduction to SVG Animations
 
-Now that you understand how to create static SVG shapes, it's time to bring them to life! SVG animations can be achieved through several methods:
+<Objective>
+- Pick the right animation system for the job (CSS transitions, keyframes, transforms, SMIL)
+- Recognize what each system does well and where it falls short
+- Build the mental model: state-changes vs ambient loops
+</Objective>
 
-1. **CSS Transitions** - Simple state changes
-2. **CSS Animations** - Keyframe-based animations
-3. **CSS Transforms** - Moving, scaling, rotating elements
-4. **SMIL** - SVG's native animation system (covered in Module 3)
+You can draw shapes — now make them move. SVGs accept four animation systems, and you'll mix them depending on what each one does best:
 
-## Why Animate SVGs?
+| System | Strengths | Limits |
+| --- | --- | --- |
+| **CSS Transitions** | State changes (hover, focus, toggle) | Two states only |
+| **CSS Keyframes** | Looping ambient motion | Some attributes are off-limits |
+| **CSS Transforms** | GPU-accelerated movement, scale, rotation | Doesn't change geometry |
+| **SMIL** | Animate any SVG attribute, motion paths, morphing | Not in Internet Explorer |
 
-- **Enhanced User Experience** - Provide visual feedback
-- **Better Communication** - Guide user attention
-- **Professional Polish** - Make interfaces feel more responsive
-- **Storytelling** - Create engaging narratives 
+This module covers the CSS-based approaches. Module 3 introduces SMIL.
+
+## Why animate at all?
+
+<LiveSVG code={`<svg viewBox="0 0 200 100">
+  <circle cx="100" cy="50" r="20" fill="#7c5cff" class="bell"/>
+</svg>
+
+<style>
+.bell {
+  transform-origin: 100px 50px;
+  animation: ring 2s ease-in-out infinite;
+}
+@keyframes ring {
+  0%, 50%, 100% { transform: rotate(0); }
+  60% { transform: rotate(15deg); }
+  70% { transform: rotate(-12deg); }
+  80% { transform: rotate(8deg); }
+  90% { transform: rotate(-5deg); }
+}
+</style>`} caption="Five lines of CSS, the difference between a static dot and 'something is happening here.'" />
+
+A static screenshot communicates **state**. Motion communicates **change**, **causality**, and **personality**. Use animation to:
+
+- **Guide attention** — animate the thing the user should look at next.
+- **Confirm action** — a button that springs slightly when clicked feels alive.
+- **Show relationships** — when one element morphs into another, the user understands they're connected.
+- **Signal status** — a pulsing dot says "loading" without using a single word.
+
+<Callout type="warn" title="Restraint">
+  Every animation has a perceptual cost. If three things move at once, the user can track none of them. Animate one focal element at a time.
+</Callout>
+
+## What's coming
+
+The next five lessons cover transitions, transforms, sequencing, and timing functions — the full CSS animation toolkit applied to SVG.
+
+<Recap takeaways={[
+  "Four ways to animate SVG: CSS transitions, keyframes, transforms, SMIL.",
+  "Transitions are for state changes (hover, focus). Keyframes are for ambient loops.",
+  "Restraint is a feature — one focal animation beats three competing ones."
+]} next={{ to: '/module/module-2?lesson=lesson-2-2', label: 'CSS Transitions' }} />

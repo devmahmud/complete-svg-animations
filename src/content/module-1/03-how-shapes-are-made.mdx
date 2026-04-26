@@ -1,64 +1,59 @@
 # How Shapes Are Made
 
-## The Path Model in Action
+<Objective>
+- Distinguish **fill** (interior) from **stroke** (outline) and apply both
+- Compose complex graphics from simple primitives
+- Use **source order** to control which shape paints on top
+</Objective>
 
-When you draw a shape on paper, you typically:
-1. Draw the outline first
-2. Color it in or leave it as an outline
-3. Adjust the thickness of your pen/marker
+When you draw on paper you sketch the outline, then either color inside or leave it as a line. SVG works the same way — every shape is a path with two paint properties: **fill** (interior color) and **stroke** (outline color + thickness).
 
-SVGs work exactly the same way:
+## Outline vs filled
 
-```html
-<!-- Just the outline -->
-<rect 
-  x="20" 
-  y="20" 
-  width="60" 
-  height="40" 
-  fill="none"
-  stroke="white"
-  stroke-width="3"
-/>
+<LiveSVG code={`<svg viewBox="0 0 200 100">
+  <!-- Just the outline -->
+  <rect x="20" y="30" width="60" height="40" fill="none" stroke="#7c5cff" stroke-width="3"/>
 
-<!-- Filled shape -->
-<rect 
-  x="20" 
-  y="20" 
-  width="60" 
-  height="40" 
-  fill="blue"
-  stroke="white"
-  stroke-width="3"
-/>
-```
+  <!-- Filled shape -->
+  <rect x="120" y="30" width="60" height="40" fill="#7c5cff" stroke="#ffd43b" stroke-width="3"/>
+</svg>`} caption="Same path, different paint. Try setting fill='none' on the right one." />
 
-## Building Complex Shapes
+The order is meaningful: SVG draws the **fill first, stroke on top**, so a thick stroke actually overlaps the fill region by half its width.
 
-Complex icons are built by combining multiple simple shapes:
+## Composition: build big from small
 
-```html
-<!-- Monitor icon example -->
-<svg viewBox="0 0 100 100">
-  <!-- Screen (rectangle outline) -->
-  <rect 
-    x="20" 
-    y="20" 
-    width="60" 
-    height="40" 
-    fill="none"
-    stroke="white"
-    stroke-width="3"
-  />
-  
-  <!-- Base (line) -->
-  <line 
-    x1="35" 
-    y1="80" 
-    x2="65" 
-    y2="80" 
-    stroke="white"
-    stroke-width="2"
-  />
-</svg>
-``` 
+Complex icons are stacks of simple shapes. Here's a monitor:
+
+<LiveSVG code={`<svg viewBox="0 0 100 100">
+  <!-- Screen -->
+  <rect x="20" y="20" width="60" height="40" rx="3" fill="none" stroke="#ede9de" stroke-width="3"/>
+  <!-- Stand -->
+  <line x1="50" y1="60" x2="50" y2="76" stroke="#ede9de" stroke-width="3"/>
+  <!-- Base -->
+  <line x1="35" y1="80" x2="65" y2="80" stroke="#ede9de" stroke-width="3" stroke-linecap="round"/>
+</svg>`} caption="Three primitives, one icon. Reorder them — z-index follows source order." />
+
+## Layering: source order = paint order
+
+The element that appears **later in the markup paints on top**. There's no `z-index` in SVG; you reorder by moving lines.
+
+<LiveSVG code={`<svg viewBox="0 0 100 100">
+  <circle cx="40" cy="50" r="22" fill="#7c5cff"/>
+  <circle cx="60" cy="50" r="22" fill="#ffd43b"/>
+</svg>`} caption="Swap the two circles to put violet on top." />
+
+<TryIt goal="Build a target: three concentric circles colored violet/yellow/violet from outside to inside.">
+<LiveSVG code={`<svg viewBox="0 0 100 100">
+  <!-- Three circles, all centered at (50, 50), radii 40 / 28 / 16 -->
+</svg>`} caption="Order matters — the largest must come first so the smaller ones paint on top." />
+</TryIt>
+
+<Callout type="tip" title="Mental model">
+  An SVG is a stack of painted paths. To debug a missing shape, ask: is its <code>fill</code> set? Is something else painting over it? Is it inside a clip?
+</Callout>
+
+<Recap takeaways={[
+  "fill paints the interior; stroke paints the outline. Either can be 'none'.",
+  "Source order is paint order — there is no z-index in SVG.",
+  "Complex icons are just stacks of primitives. Composition is the skill."
+]} next={{ to: '/module/module-1?lesson=lesson-1-4', label: 'Coordinate System' }} />

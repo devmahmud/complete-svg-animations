@@ -1,0 +1,123 @@
+# Animating with JavaScript
+
+<Objective>
+- Use the Web Animations API as a modern replacement for CSS keyframes
+- Schedule per-frame work with `requestAnimationFrame` for physics or scrub control
+- Trigger animations on scroll with `IntersectionObserver`
+- Know when to graduate to Framer Motion / GSAP / Motion One
+</Objective>
+
+CSS and SMIL cover ~90% of SVG animation. The remaining 10% — physics, scroll-driven motion, dynamic timing tied to data — is where JavaScript earns its place.
+
+## The Web Animations API
+
+The Web Animations API (WAAPI) is built into every modern browser. It does everything CSS keyframes do, but driven from JavaScript with imperative control:
+
+```js
+const dot = document.querySelector('circle');
+
+const anim = dot.animate(
+  [
+    { transform: 'translateX(0)' },
+    { transform: 'translateX(200px)' },
+    { transform: 'translateX(0)' },
+  ],
+  { duration: 2000, iterations: Infinity, easing: 'cubic-bezier(0.42, 0, 0.58, 1)' }
+);
+
+// Pause, resume, jump, reverse — all with method calls
+anim.pause();
+anim.currentTime = 1000;
+anim.playbackRate = 0.5; // half speed
+```
+
+WAAPI is the right tool when you need imperative control: pause on hover, scrub to a position, change speed mid-animation.
+
+## requestAnimationFrame: per-frame control
+
+When you need physics, simulations, or anything that depends on previous-frame state, drop down to `requestAnimationFrame`:
+
+```js
+const dot = document.querySelector('circle');
+let x = 50, vx = 0.5; // velocity
+
+function frame() {
+  x += vx;
+  if (x > 90 || x < 10) vx = -vx;   // bounce off the walls
+  dot.setAttribute('cx', x);
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+```
+
+This is overkill for typical UI animation, but the right tool for:
+
+- Particle systems
+- Gravity / spring physics
+- Mouse-following effects with momentum
+- Animations driven by audio analysis or sensor input
+
+## Scroll-triggered animations with IntersectionObserver
+
+Scroll-linked animations are everywhere. The wrong way: listening to `scroll` events (every pixel of scroll fires an event — death for performance). The right way: `IntersectionObserver`.
+
+```js
+const observer = new IntersectionObserver(
+  (entries) => {
+    entries.forEach((e) => {
+      if (e.isIntersecting) {
+        e.target.classList.add('reveal');
+        observer.unobserve(e.target);
+      }
+    });
+  },
+  { threshold: 0.3 } // fire when 30% visible
+);
+
+document.querySelectorAll('.scroll-target').forEach((el) => observer.observe(el));
+```
+
+Pair this with a CSS class that triggers the animation:
+
+```css
+.scroll-target { opacity: 0; transform: translateY(20px); transition: 0.6s ease; }
+.scroll-target.reveal { opacity: 1; transform: translateY(0); }
+```
+
+For scroll-scrubbing (animation progress tracks scroll position), the new CSS Scroll-Driven Animations spec or `IntersectionObserver` with multiple thresholds works.
+
+## When to reach for a library
+
+Hand-rolled is great until it isn't. The signs you've outgrown raw APIs:
+
+| Need | Library |
+| --- | --- |
+| Spring physics, gestures, layout transitions in React | **Framer Motion** |
+| Cross-browser, battle-tested, professional motion graphics | **GSAP** |
+| Tiny bundle, modern API, replaces CSS animations | **Motion One** |
+| Path interpolation between arbitrary shapes | **Flubber** |
+| Lottie animations from After Effects | **lottie-web** |
+
+These libraries solve specific problems well. They're not a replacement for understanding what's underneath — they're a productivity layer on top.
+
+## Animation in React, recap
+
+You've now seen four levels of abstraction:
+
+1. **CSS classes + transitions/keyframes** — declarative, no JS needed.
+2. **SMIL inside SVG** — declarative, runs even with JS disabled.
+3. **WAAPI / `element.animate()`** — imperative, fine-grained control.
+4. **Library (Framer Motion / GSAP)** — high-level abstractions on top of the above.
+
+Pick the lowest level that solves your problem. A hover state should be CSS, not GSAP.
+
+<Callout type="tip" title="Profile, don't guess">
+  Every "this is slow" hunch should be verified in DevTools → Performance. A surprising amount of perceived jank turns out to be expensive layout from CSS unrelated to the animation.
+</Callout>
+
+<Recap takeaways={[
+  "WAAPI is CSS keyframes with an imperative API — pause, scrub, reverse.",
+  "requestAnimationFrame is the right tool for physics and per-frame state.",
+  "IntersectionObserver beats scroll listeners for reveal-on-scroll.",
+  "Pick the lowest abstraction that works — libraries are a productivity layer, not a default."
+]} next={{ to: '/playground', label: 'Open the Playground' }} />
